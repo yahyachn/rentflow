@@ -3,6 +3,7 @@ import { Lock } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/tenant";
 import { listCoupons } from "@/services/coupons";
+import { listReviews } from "@/services/reviews";
 import { listCustomerOptions } from "@/services/customers";
 import { paidAmountByReservation } from "@/services/payments";
 import {
@@ -18,6 +19,7 @@ import type {
   VehicleOption,
 } from "@/features/reservations/types";
 import type { CouponDTO } from "@/features/coupons/types";
+import type { ReviewDTO } from "@/features/reviews/types";
 
 export const metadata: Metadata = { title: "Reservations" };
 
@@ -64,13 +66,15 @@ export default async function ReservationsPage() {
     );
   }
 
-  const [reservationRows, vehicleRows, customerRows, paidMap, couponRows] = await Promise.all([
-    listReservations(user.agencyId),
-    listBookableVehicles(user.agencyId),
-    listCustomerOptions(user.agencyId),
-    paidAmountByReservation(user.agencyId),
-    canManage ? listCoupons(user.agencyId) : Promise.resolve([]),
-  ]);
+  const [reservationRows, vehicleRows, customerRows, paidMap, couponRows, reviewRows] =
+    await Promise.all([
+      listReservations(user.agencyId),
+      listBookableVehicles(user.agencyId),
+      listCustomerOptions(user.agencyId),
+      paidAmountByReservation(user.agencyId),
+      canManage ? listCoupons(user.agencyId) : Promise.resolve([]),
+      canManage ? listReviews(user.agencyId) : Promise.resolve([]),
+    ]);
 
   const reservations = reservationRows.map((r) => toReservationDTO(r, paidMap.get(r.id) ?? 0));
   const vehicles: VehicleOption[] = vehicleRows.map((v) => ({
@@ -94,6 +98,15 @@ export default async function ReservationsPage() {
     expiresAt: c.expiresAt ? c.expiresAt.toISOString() : null,
     isActive: c.isActive,
   }));
+  const reviews: ReviewDTO[] = reviewRows.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    comment: r.comment,
+    isPublished: r.isPublished,
+    createdAt: r.createdAt.toISOString(),
+    vehicleLabel: `${r.vehicle.brand} ${r.vehicle.model} (${r.vehicle.year})`,
+    customerName: `${r.customer.firstName} ${r.customer.lastName}`,
+  }));
 
   return (
     <div className="space-y-6">
@@ -103,6 +116,7 @@ export default async function ReservationsPage() {
         vehicles={vehicles}
         customers={customers}
         coupons={coupons}
+        reviews={reviews}
         canManage={canManage}
         canApprove={canApprove}
         canInvoice={canInvoice}

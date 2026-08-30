@@ -11,6 +11,7 @@ import {
   List as ListIcon,
   MoreHorizontal,
   Search,
+  Star,
   TicketPercent,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -60,6 +61,8 @@ import { RecordPaymentDialog } from "@/features/payments/record-payment-dialog";
 import { NewReservationDialog } from "./new-reservation-dialog";
 import { CouponsView } from "@/features/coupons/coupons-view";
 import type { CouponDTO } from "@/features/coupons/types";
+import { ReviewsView } from "@/features/reviews/reviews-view";
+import type { ReviewDTO } from "@/features/reviews/types";
 import type {
   CustomerOption,
   ReservationDTO,
@@ -94,6 +97,7 @@ export function ReservationsView({
   vehicles,
   customers,
   coupons,
+  reviews,
   canManage,
   canApprove,
   canInvoice,
@@ -102,6 +106,7 @@ export function ReservationsView({
   vehicles: VehicleOption[];
   customers: CustomerOption[];
   coupons: CouponDTO[];
+  reviews: ReviewDTO[];
   canManage: boolean;
   canApprove: boolean;
   canInvoice: boolean;
@@ -164,6 +169,11 @@ export function ReservationsView({
             {canManage && (
               <TabsTrigger value="coupons">
                 <TicketPercent /> Coupons
+              </TabsTrigger>
+            )}
+            {canManage && (
+              <TabsTrigger value="reviews">
+                <Star /> Reviews
               </TabsTrigger>
             )}
           </TabsList>
@@ -337,6 +347,16 @@ export function ReservationsView({
         {canManage && (
           <TabsContent value="coupons">
             <CouponsView coupons={coupons} canManage={canManage} />
+          </TabsContent>
+        )}
+        {canManage && (
+          <TabsContent value="reviews">
+            <ReviewsView
+              reviews={reviews}
+              vehicles={vehicles}
+              customers={customers}
+              canManage={canManage}
+            />
           </TabsContent>
         )}
       </Tabs>
