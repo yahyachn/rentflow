@@ -35,7 +35,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
       <DropdownMenuTrigger
         disabled={pending}
         className={cn(
-          "inline-flex h-9 items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 text-sm font-medium text-foreground/90 backdrop-blur transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-60",
+          "border-border bg-muted/50 text-foreground/80 hover:bg-muted focus-visible:ring-ring/50 inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-sm font-medium backdrop-blur transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60",
           className,
         )}
         aria-label="Change language"

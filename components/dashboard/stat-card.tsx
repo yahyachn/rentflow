@@ -21,33 +21,46 @@ export function StatCard({
   const isPositive = typeof trend === "number" && trend >= 0;
 
   return (
-    <Card>
-      <CardContent className="flex items-start justify-between gap-4">
+    <Card className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+      {/* subtle top accent glow */}
+      <span
+        className={cn(
+          "pointer-events-none absolute -top-16 end-[-3rem] size-32 rounded-full opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100",
+          accent === "primary" && "bg-primary/20",
+          accent === "accent" && "bg-accent/20",
+          accent === "warning" && "bg-warning/20",
+          accent === "destructive" && "bg-destructive/20",
+        )}
+      />
+      <CardContent className="relative flex items-start justify-between gap-4">
         <div className="space-y-1.5">
           <p className="text-muted-foreground text-sm">{label}</p>
           <p className="font-display text-2xl font-semibold tabular-nums">{value}</p>
           {typeof trend === "number" && (
             <p
               className={cn(
-                "text-xs font-medium",
-                isPositive ? "text-success" : "text-destructive",
+                "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-medium",
+                isPositive
+                  ? "bg-success/10 text-success"
+                  : "bg-destructive/10 text-destructive",
               )}
             >
-              {isPositive ? "+" : ""}
+              {isPositive ? "▲" : "▼"} {isPositive ? "+" : ""}
               {trend}% {trendLabel}
             </p>
           )}
         </div>
         <span
           className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-lg",
-            accent === "primary" && "bg-primary/10 text-primary",
-            accent === "accent" && "bg-accent/10 text-accent",
-            accent === "warning" && "bg-warning/15 text-warning-foreground",
-            accent === "destructive" && "bg-destructive/10 text-destructive",
+            "flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-md",
+            accent === "primary" && "bg-gradient-to-br from-primary to-[var(--gold)] shadow-primary/20",
+            accent === "accent" && "bg-gradient-to-br from-accent to-primary shadow-accent/20",
+            accent === "warning" && "from-warning bg-gradient-to-br to-[var(--gold)] shadow-warning/20",
+            accent === "destructive" &&
+              "from-destructive bg-gradient-to-br to-[var(--gold)] shadow-destructive/20",
           )}
         >
-          <Icon className="size-4.5" />
+          <Icon className="size-5" />
         </span>
       </CardContent>
     </Card>

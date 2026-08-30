@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CalendarClock, PlusCircle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { BarChart3, CalendarClock, CalendarDays, Car, PlusCircle, Users } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/tenant";
 import { recentReservations } from "@/services/reservations";
@@ -19,12 +20,16 @@ export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function DashboardHomePage() {
   const user = await getCurrentUser();
+  const t = await getTranslations("dash");
   const firstName = user?.name.split(" ")[0] ?? "there";
   const permissionKeys = user?.role?.permissions.map((rp) => rp.permission.key) ?? [];
   const canManageFleet = user?.role == null || permissionKeys.includes("fleet.manage");
   const recent = user ? await recentReservations(user.agencyId) : [];
 
-  const STATUS_VARIANT: Record<string, "warning" | "default" | "accent" | "success" | "destructive" | "secondary"> = {
+  const STATUS_VARIANT: Record<
+    string,
+    "warning" | "default" | "accent" | "success" | "destructive" | "secondary"
+  > = {
     PENDING: "warning",
     CONFIRMED: "default",
     ONGOING: "accent",
@@ -33,22 +38,38 @@ export default async function DashboardHomePage() {
     NO_SHOW: "secondary",
   };
 
+  const quickActions = [
+    { href: "/dashboard/fleet", icon: Car, label: t("qaFleet") },
+    { href: "/dashboard/reservations", icon: CalendarDays, label: t("qaReservations") },
+    { href: "/dashboard/customers", icon: Users, label: t("qaCustomers") },
+    { href: "/dashboard/analytics", icon: BarChart3, label: t("qaAnalytics") },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">Welcome back, {firstName}</h1>
-          <p className="text-muted-foreground text-sm">
-            Here&apos;s what&apos;s happening with {user?.agency.name} today.
-          </p>
+      {/* Welcome banner */}
+      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-card to-card p-6">
+        <div className="pointer-events-none absolute -top-16 end-[-3rem] size-52 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-display text-2xl font-semibold tracking-tight">
+              {t("welcome", { name: firstName })}
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              {t("welcomeSub", { agency: user?.agency.name ?? "" })}
+            </p>
+          </div>
+          {canManageFleet && (
+            <Button
+              asChild
+              className="bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground shadow-md shadow-primary/20 hover:opacity-95"
+            >
+              <Link href="/dashboard/fleet">
+                <PlusCircle /> {t("addVehicle")}
+              </Link>
+            </Button>
+          )}
         </div>
-        {canManageFleet && (
-          <Button asChild>
-            <Link href="/dashboard/fleet">
-              <PlusCircle /> Add vehicle
-            </Link>
-          </Button>
-        )}
       </div>
 
       <Suspense fallback={<DashboardStatsSkeleton />}>
@@ -58,36 +79,41 @@ export default async function DashboardHomePage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader className="border-b">
-            <CardTitle>Recent reservations</CardTitle>
+            <CardTitle>{t("recent")}</CardTitle>
           </CardHeader>
           <CardContent>
             {recent.length === 0 ? (
               <EmptyState
                 icon={CalendarClock}
-                title="No reservations yet"
-                description="Create a booking from the Reservations tab — it'll show up here."
+                title={t("noReservations")}
+                description={t("noReservationsDesc")}
               />
             ) : (
               <ul className="divide-y">
                 {recent.map((r) => (
-                  <li key={r.id} className="flex items-center justify-between gap-3 py-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {r.customer.firstName} {r.customer.lastName}
-                      </p>
-                      <p className="text-muted-foreground truncate text-xs">
-                        {r.reservationNumber} · {r.vehicle.brand} {r.vehicle.model} ·{" "}
-                        {formatDate(r.pickupDate)}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                      <span className="text-sm font-medium tabular-nums">
-                        {formatCurrency(Number(r.totalPrice))}
-                      </span>
-                      <Badge variant={STATUS_VARIANT[r.status] ?? "secondary"}>
-                        {r.status.charAt(0) + r.status.slice(1).toLowerCase().replace("_", "-")}
-                      </Badge>
-                    </div>
+                  <li key={r.id}>
+                    <Link
+                      href={`/dashboard/reservations/${r.id}`}
+                      className="hover:bg-muted/50 -mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-3 transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          {r.customer.firstName} {r.customer.lastName}
+                        </p>
+                        <p className="text-muted-foreground truncate text-xs">
+                          {r.reservationNumber} · {r.vehicle.brand} {r.vehicle.model} ·{" "}
+                          {formatDate(r.pickupDate)}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <span className="text-sm font-medium tabular-nums">
+                          {formatCurrency(Number(r.totalPrice))}
+                        </span>
+                        <Badge variant={STATUS_VARIANT[r.status] ?? "secondary"}>
+                          {r.status.charAt(0) + r.status.slice(1).toLowerCase().replace("_", "-")}
+                        </Badge>
+                      </div>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -97,21 +123,21 @@ export default async function DashboardHomePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>What&apos;s next</CardTitle>
+            <CardTitle>{t("quickActions")}</CardTitle>
           </CardHeader>
-          <CardContent className="text-muted-foreground space-y-3 text-sm">
-            <p>
-              <span className="text-foreground font-medium">Phase 2</span> — Fleet CRUD, vehicle
-              images, categories, and pricing.
-            </p>
-            <p>
-              <span className="text-foreground font-medium">Phase 3</span> — Reservation system,
-              booking calendar, customer management.
-            </p>
-            <p>
-              <span className="text-foreground font-medium">Phase 4</span> — Full analytics
-              dashboard and charts.
-            </p>
+          <CardContent className="grid grid-cols-2 gap-3">
+            {quickActions.map((a) => (
+              <Link
+                key={a.href}
+                href={a.href}
+                className="group border-border hover:border-primary/40 hover:bg-primary/5 flex flex-col gap-2 rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
+              >
+                <span className="text-primary-foreground flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[var(--gold)] transition-transform duration-200 group-hover:scale-110">
+                  <a.icon className="size-4.5" />
+                </span>
+                <span className="text-sm font-medium">{a.label}</span>
+              </Link>
+            ))}
           </CardContent>
         </Card>
       </div>

@@ -230,5 +230,32 @@
     "a5": "La plupart des véhicules incluent un kilométrage illimité — indiqué sur la page de spécifications de chaque véhicule. Lorsqu'une limite journalière s'applique, elle y est aussi indiquée.",
     "q6": "Comment annuler ou modifier une réservation ?",
     "a6": "Contactez-nous dès que possible par téléphone, WhatsApp ou le formulaire de contact. Les conditions d'annulation dépendent de la proximité de la date de prise en charge."
+  },
+  "dashNav": {
+    "dashboard": "Tableau de bord",
+    "fleet": "Flotte",
+    "reservations": "Réservations",
+    "customers": "Clients",
+    "analytics": "Analyses",
+    "settings": "Paramètres"
+  },
+  "dash": {
+    "welcome": "Bon retour, {name}",
+    "welcomeSub": "Voici l'activité de {agency} aujourd'hui.",
+    "addVehicle": "Ajouter un véhicule",
+    "recent": "Réservations récentes",
+    "noReservations": "Aucune réservation",
+    "noReservationsDesc": "Créez une réservation depuis l'onglet Réservations — elle apparaîtra ici.",
+    "searchPlaceholder": "Rechercher véhicules, réservations, clients…",
+    "quickActions": "Actions rapides",
+    "qaFleet": "Gérer la flotte",
+    "qaReservations": "Voir les réservations",
+    "qaCustomers": "Clients",
+    "qaAnalytics": "Analyses",
+    "statRevenue": "Revenu",
+    "statReservations": "Réservations",
+    "statAvailable": "Véhicules disponibles",
+    "statCustomers": "Clients",
+    "statPending": "{count} en attente"
   }
 }

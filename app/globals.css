@@ -60,6 +60,10 @@
   --sidebar-accent-foreground: oklch(0.98 0.005 265);
   --sidebar-border: oklch(0.28 0.03 265);
   --sidebar-ring: oklch(0.549 0.207 262.1);
+
+  /* Warm-gold accent shared with the marketing surface, for gradient marks. */
+  --gold: oklch(0.78 0.13 78);
+  --gold-soft: oklch(0.86 0.1 84);
 }
 
 .dark {
@@ -110,6 +114,9 @@
   --sidebar-accent-foreground: oklch(0.96 0.005 265);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.62 0.19 262.1);
+
+  --gold: oklch(0.83 0.13 84);
+  --gold-soft: oklch(0.9 0.09 90);
 }
 
 @theme inline {

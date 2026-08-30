@@ -230,5 +230,32 @@
     "a5": "Most vehicles include unlimited mileage — shown on each vehicle's specification page. Where a daily limit applies, it's listed there too.",
     "q6": "How do I cancel or modify a reservation?",
     "a6": "Contact us as soon as possible via phone, WhatsApp, or the contact form. Cancellation terms depend on how close to the pickup date you cancel."
+  },
+  "dashNav": {
+    "dashboard": "Dashboard",
+    "fleet": "Fleet",
+    "reservations": "Reservations",
+    "customers": "Customers",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "dash": {
+    "welcome": "Welcome back, {name}",
+    "welcomeSub": "Here's what's happening with {agency} today.",
+    "addVehicle": "Add vehicle",
+    "recent": "Recent reservations",
+    "noReservations": "No reservations yet",
+    "noReservationsDesc": "Create a booking from the Reservations tab — it'll show up here.",
+    "searchPlaceholder": "Search vehicles, reservations, customers…",
+    "quickActions": "Quick actions",
+    "qaFleet": "Manage fleet",
+    "qaReservations": "View reservations",
+    "qaCustomers": "Customers",
+    "qaAnalytics": "Analytics",
+    "statRevenue": "Revenue",
+    "statReservations": "Reservations",
+    "statAvailable": "Available vehicles",
+    "statCustomers": "Customers",
+    "statPending": "{count} pending"
   }
 }
