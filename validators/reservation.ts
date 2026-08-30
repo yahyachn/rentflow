@@ -66,6 +66,7 @@ export const reservationSchema = z
     flightNumber: optionalText(40),
     licenseCountry: optionalText(80),
     message: optionalText(2000),
+    couponCode: optionalText(30),
   })
   .refine((data) => Boolean(data.customerId) || Boolean(data.newCustomer), {
     message: "Select a customer or add a new one",

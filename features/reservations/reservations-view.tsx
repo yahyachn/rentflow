@@ -11,6 +11,7 @@ import {
   List as ListIcon,
   MoreHorizontal,
   Search,
+  TicketPercent,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -57,6 +58,8 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { RESERVATION_TRANSITIONS } from "@/validators/reservation";
 import { RecordPaymentDialog } from "@/features/payments/record-payment-dialog";
 import { NewReservationDialog } from "./new-reservation-dialog";
+import { CouponsView } from "@/features/coupons/coupons-view";
+import type { CouponDTO } from "@/features/coupons/types";
 import type {
   CustomerOption,
   ReservationDTO,
@@ -90,6 +93,7 @@ export function ReservationsView({
   reservations,
   vehicles,
   customers,
+  coupons,
   canManage,
   canApprove,
   canInvoice,
@@ -97,6 +101,7 @@ export function ReservationsView({
   reservations: ReservationDTO[];
   vehicles: VehicleOption[];
   customers: CustomerOption[];
+  coupons: CouponDTO[];
   canManage: boolean;
   canApprove: boolean;
   canInvoice: boolean;
@@ -156,6 +161,11 @@ export function ReservationsView({
             <TabsTrigger value="timeline">
               <CalendarRange /> Timeline
             </TabsTrigger>
+            {canManage && (
+              <TabsTrigger value="coupons">
+                <TicketPercent /> Coupons
+              </TabsTrigger>
+            )}
           </TabsList>
           {canManage && (
             <Button onClick={() => setNewOpen(true)} disabled={vehicles.length === 0}>
@@ -324,6 +334,11 @@ export function ReservationsView({
         <TabsContent value="timeline">
           <BookingTimeline reservations={reservations} vehicles={vehicles} />
         </TabsContent>
+        {canManage && (
+          <TabsContent value="coupons">
+            <CouponsView coupons={coupons} canManage={canManage} />
+          </TabsContent>
+        )}
       </Tabs>
 
       {canManage && (

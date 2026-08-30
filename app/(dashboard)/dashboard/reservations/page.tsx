@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lock } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/tenant";
+import { listCoupons } from "@/services/coupons";
 import { listCustomerOptions } from "@/services/customers";
 import { paidAmountByReservation } from "@/services/payments";
 import {
@@ -16,6 +17,7 @@ import type {
   ReservationDTO,
   VehicleOption,
 } from "@/features/reservations/types";
+import type { CouponDTO } from "@/features/coupons/types";
 
 export const metadata: Metadata = { title: "Reservations" };
 
@@ -62,11 +64,12 @@ export default async function ReservationsPage() {
     );
   }
 
-  const [reservationRows, vehicleRows, customerRows, paidMap] = await Promise.all([
+  const [reservationRows, vehicleRows, customerRows, paidMap, couponRows] = await Promise.all([
     listReservations(user.agencyId),
     listBookableVehicles(user.agencyId),
     listCustomerOptions(user.agencyId),
     paidAmountByReservation(user.agencyId),
+    canManage ? listCoupons(user.agencyId) : Promise.resolve([]),
   ]);
 
   const reservations = reservationRows.map((r) => toReservationDTO(r, paidMap.get(r.id) ?? 0));
@@ -79,6 +82,18 @@ export default async function ReservationsPage() {
     id: c.id,
     label: `${c.firstName} ${c.lastName}${c.phone ? ` · ${c.phone}` : ""}`,
   }));
+  const coupons: CouponDTO[] = couponRows.map((c) => ({
+    id: c.id,
+    code: c.code,
+    type: c.type,
+    value: Number(c.value),
+    maxUses: c.maxUses,
+    usedCount: c.usedCount,
+    minRentalDays: c.minRentalDays,
+    startsAt: c.startsAt ? c.startsAt.toISOString() : null,
+    expiresAt: c.expiresAt ? c.expiresAt.toISOString() : null,
+    isActive: c.isActive,
+  }));
 
   return (
     <div className="space-y-6">
@@ -87,6 +102,7 @@ export default async function ReservationsPage() {
         reservations={reservations}
         vehicles={vehicles}
         customers={customers}
+        coupons={coupons}
         canManage={canManage}
         canApprove={canApprove}
         canInvoice={canInvoice}

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma, ReservationStatus } from "@prisma/client";
+import { incrementCouponUsage, validateCoupon } from "@/services/coupons";
 import {
   notifyReservationCreated,
   notifyReservationStatusChanged,
@@ -114,8 +115,20 @@ export async function createReservation(
 
   const durationDays = durationInDays(pickup, ret);
   const basePrice = Number(daily.amount) * durationDays;
-  const totalPrice = basePrice; // discounts/extras/coupons land in later phases
   const depositAmount = Number(vehicle.depositAmount);
+
+  // Optional discount coupon (validated against the current booking).
+  let discountAmount = 0;
+  let couponId: string | null = null;
+  if (input.couponCode) {
+    const applied = await validateCoupon(agencyId, input.couponCode, {
+      durationDays,
+      subtotal: basePrice,
+    });
+    discountAmount = applied.discountAmount;
+    couponId = applied.couponId;
+  }
+  const totalPrice = Math.max(0, basePrice - discountAmount);
 
   const reservation = await prisma.$transaction(async (tx) => {
     // Double-booking guard: any BOOKED/BLOCKED/MAINTENANCE window that overlaps
@@ -181,8 +194,10 @@ export async function createReservation(
         message: input.message ?? null,
         durationDays,
         basePrice,
+        discountAmount,
         totalPrice,
         depositAmount,
+        couponId,
         createdById: userId,
       },
     });
@@ -211,6 +226,8 @@ export async function createReservation(
       where: { id: customerId },
       data: { totalBookings: { increment: 1 } },
     });
+
+    if (couponId) await incrementCouponUsage(tx, couponId);
 
     return reservation;
   });

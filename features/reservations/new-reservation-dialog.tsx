@@ -45,6 +45,7 @@ const emptyForm = {
   source: "WALK_IN",
   driverAge: "",
   message: "",
+  couponCode: "",
 };
 
 type FormState = typeof emptyForm;
@@ -115,6 +116,7 @@ export function NewReservationDialog({
       source: form.source,
       driverAge: form.driverAge,
       message: form.message,
+      couponCode: form.couponCode,
     };
 
     const parsed = reservationSchema.safeParse(payload);
@@ -313,6 +315,20 @@ export function NewReservationDialog({
                 onChange={(e) => set("driverAge", e.target.value)}
               />
               {err("driverAge")}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="couponCode">Coupon code (optional)</Label>
+              <Input
+                id="couponCode"
+                value={form.couponCode}
+                onChange={(e) => set("couponCode", e.target.value)}
+                placeholder="e.g. SUMMER20"
+                className="uppercase"
+              />
+              {err("couponCode")}
             </div>
           </div>
 

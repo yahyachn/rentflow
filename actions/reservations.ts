@@ -37,6 +37,16 @@ function messageFor(err: unknown): string {
       return "That reservation no longer exists.";
     case "INVALID_TRANSITION":
       return "That status change isn't allowed from the current status.";
+    case "COUPON_INVALID":
+      return "That coupon code isn't valid.";
+    case "COUPON_EXPIRED":
+      return "That coupon has expired.";
+    case "COUPON_NOT_STARTED":
+      return "That coupon isn't active yet.";
+    case "COUPON_MAX_USES":
+      return "That coupon has reached its usage limit.";
+    case "COUPON_MIN_DAYS":
+      return "This booking is too short for that coupon.";
     default:
       return "Something went wrong. Please try again.";
   }
