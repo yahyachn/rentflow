@@ -1,0 +1,921 @@
+// ============================================================================
+// RentFlow — Multi-tenant Car & Motorcycle Rental Management SaaS
+// Prisma schema
+//
+// Tenancy model: every business-data table carries an `agencyId` foreign key
+// pointing at the `Agency` that owns the row. All queries in `services/` MUST
+// be scoped by the current agency's id (see lib/tenant.ts) — there is no
+// row-level security at the DB layer in this phase, so isolation is enforced
+// entirely in the application/service layer. MySQL has no native RLS
+// equivalent either, so this stays an application-layer concern regardless
+// of provider — revisit with a defense-in-depth strategy (e.g. per-tenant
+// views, or a switch to Postgres + RLS) once the platform needs it.
+//
+// Conventions:
+//   - Primary keys are UUIDs (`@default(uuid())`).
+//   - Every table has `createdAt` / `updatedAt`.
+//   - Business tables use soft deletes (`deletedAt DateTime?`) instead of a
+//     hard `DELETE`, so history (reservations, invoices, audit trail) is
+//     never lost. Application queries should default to `deletedAt: null`.
+// ============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["queryCompiler", "driverAdapters"]
+  engineType      = "client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy
+// ---------------------------------------------------------------------------
+
+enum AgencyPlan {
+  TRIAL
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum AgencyStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+/// A rental agency — the tenant boundary of the whole platform.
+/// Served at `{slug}.rentflow.ma` (see middleware.ts for subdomain routing).
+model Agency {
+  id          String @id @default(uuid())
+  name        String
+  slug        String @unique
+  domain      String? @unique // optional custom domain, e.g. www.agencya.com
+
+  logoUrl      String?
+  coverImageUrl String?
+  description  String? @db.Text
+
+  email   String?
+  phone   String?
+  whatsapp String?
+  address String?
+  city    String?
+  country String  @default("Morocco")
+
+  currency String @default("MAD")
+  timezone String @default("Africa/Casablanca")
+
+  // Per-agency brand override of the RentFlow default palette.
+  primaryColor String @default("#2563EB")
+  accentColor  String @default("#10B981")
+
+  plan          AgencyPlan   @default(TRIAL)
+  status        AgencyStatus @default(TRIAL)
+  trialEndsAt   DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  users              User[]
+  roles              Role[]
+  vehicles           Vehicle[]
+  vehicleCategories  VehicleCategory[]
+  customers          Customer[]
+  reservations       Reservation[]
+  invoices           Invoice[]
+  payments           Payment[]
+  notifications      Notification[]
+  reviews            Review[]
+  coupons            Coupon[]
+  maintenances       Maintenance[]
+  activityLogs       ActivityLog[]
+  auditLogs          AuditLog[]
+  settings           Settings?
+
+  @@index([status])
+  @@map("agencies")
+}
+
+// ---------------------------------------------------------------------------
+// Auth / Staff / RBAC
+// ---------------------------------------------------------------------------
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+/// Global catalog of permission keys (e.g. "fleet.manage", "reservations.approve").
+/// Seeded once; not agency-scoped, since the *catalog* of possible permissions
+/// is the same for everyone — what differs per agency is which Role has which.
+model Permission {
+  id          String  @id @default(uuid())
+  key         String  @unique // e.g. "fleet.manage"
+  label       String
+  group       String  // e.g. "Fleet", "Reservations", "Customers", "Analytics", "Settings"
+  description String?
+
+  roles RolePermission[]
+
+  createdAt DateTime @default(now())
+
+  @@map("permissions")
+}
+
+/// A role scoped to one agency (Owner / Manager / Employee are seeded as
+/// system roles per agency; agencies can also define custom roles).
+model Role {
+  id       String  @id @default(uuid())
+  agencyId String
+  agency   Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  name        String // "Owner", "Manager", "Employee", or custom
+  description String?
+  isSystem    Boolean @default(false)
+
+  users       User[]
+  permissions RolePermission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([agencyId, name])
+  @@map("roles")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+/// Staff / dashboard user. Doubles as the Better Auth `user` model — see
+/// lib/auth.ts for the Better Auth config that points at this table.
+model User {
+  id            String    @id @default(uuid())
+  agencyId      String
+  agency        Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  roleId        String?
+  role          Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  phone         String?
+
+  status      UserStatus @default(ACTIVE)
+  lastLoginAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  sessions Session[]
+  accounts Account[]
+
+  activityLogs         ActivityLog[]
+  auditLogs             AuditLog[]
+  reservationsCreated  Reservation[]        @relation("ReservationCreatedBy")
+  reservationStatusLogs ReservationStatusLog[]
+  maintenancesLogged   Maintenance[]
+
+  @@index([agencyId])
+  @@map("users")
+}
+
+/// Better Auth session table — one row per active login session.
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+/// Better Auth account table — credential (email/password) and, later,
+/// OAuth provider linkage all live here.
+model Account {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accountId  String
+  providerId String
+  /// Better Auth's synthetic issuer namespace (e.g. "local:credential" for
+  /// email/password accounts, "local:oauth:<provider>" for OAuth) — required
+  /// by Better Auth >=1.7's account lookup, distinct from providerId.
+  issuer     String
+
+  accessToken           String?  @db.Text
+  refreshToken          String?  @db.Text
+  idToken                String? @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                  String?
+  password               String? // hashed credential password
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([providerId, issuer, accountId])
+  @@map("accounts")
+}
+
+/// Better Auth verification table — email verification / password reset tokens.
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+// ---------------------------------------------------------------------------
+// Fleet
+// ---------------------------------------------------------------------------
+
+enum VehicleType {
+  CAR
+  MOTORCYCLE
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  BOOKED
+  MAINTENANCE
+  HIDDEN
+}
+
+enum TransmissionType {
+  AUTOMATIC
+  MANUAL
+  SEMI_AUTOMATIC
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  ELECTRIC
+  HYBRID
+}
+
+model VehicleCategory {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  type        VehicleType
+  description String?
+  icon        String? // lucide icon name
+
+  vehicles Vehicle[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([agencyId, slug])
+  @@map("vehicle_categories")
+}
+
+model Vehicle {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   VehicleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  type  VehicleType
+  brand String
+  model String
+  year  Int
+  slug  String
+
+  transmission TransmissionType
+  fuel         FuelType
+  horsepower   Int?
+  engineSize   String? // e.g. "2.0L" or "650cc"
+  seats        Int?
+  doors        Int?
+  color        String?
+  licensePlate String?
+  mileage      Int? // current odometer (km)
+
+  hasAC        Boolean @default(true)
+  hasBluetooth Boolean @default(false)
+  hasGPS       Boolean @default(false)
+  unlimitedKm  Boolean @default(false)
+  mileageLimitPerDay Int?
+
+  insuranceIncluded Boolean  @default(true)
+  depositAmount     Decimal  @default(0) @db.Decimal(10, 2)
+
+  description String? @db.Text
+
+  status   VehicleStatus @default(AVAILABLE)
+  featured Boolean       @default(false)
+  viewCount Int          @default(0)
+
+  // Fleet maintenance alerts (Fleet Management > Maintenance Information)
+  insuranceExpiresAt   DateTime?
+  registrationExpiresAt DateTime?
+  lastOilChangeAt       DateTime?
+  lastOilChangeMileage  Int?
+  maintenanceNotes      String?  @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  images       VehicleImage[]
+  pricing      VehiclePricing[]
+  availability VehicleAvailability[]
+  reservations Reservation[]
+  reviews      Review[]
+  maintenances Maintenance[]
+
+  @@unique([agencyId, slug])
+  @@index([agencyId, status])
+  @@index([agencyId, type])
+  @@index([agencyId, featured])
+  @@map("vehicles")
+}
+
+model VehicleImage {
+  id        String  @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  url      String
+  publicId String? // Cloudinary public_id, used for deletion/transformations
+  alt      String?
+  position Int     @default(0)
+  isCover  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([vehicleId])
+  @@map("vehicle_images")
+}
+
+enum PricingPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  WEEKEND
+  HOLIDAY
+  SEASONAL
+}
+
+model VehiclePricing {
+  id        String  @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  period          PricingPeriod
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("MAD")
+  discountPercent Decimal? @db.Decimal(5, 2)
+
+  // Only set for SEASONAL/HOLIDAY windows.
+  startDate DateTime?
+  endDate   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([vehicleId, period])
+  @@map("vehicle_pricing")
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  BOOKED
+  BLOCKED
+  MAINTENANCE
+}
+
+/// Explicit availability blocks (manual blocks, maintenance windows, and
+/// blocks auto-created alongside a Reservation). The booking calendar reads
+/// this table to render Google-Calendar-style timelines per vehicle.
+model VehicleAvailability {
+  id        String  @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  startDate DateTime
+  endDate   DateTime
+  status    AvailabilityStatus @default(BLOCKED)
+  reason    String?
+
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([vehicleId, startDate, endDate])
+  @@map("vehicle_availability")
+}
+
+// ---------------------------------------------------------------------------
+// Customers
+// ---------------------------------------------------------------------------
+
+enum CustomerStatus {
+  REGULAR
+  VIP
+  BLACKLISTED
+}
+
+model Customer {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  whatsapp  String?
+
+  country String?
+  city    String?
+
+  licenseNumber  String?
+  licenseCountry String?
+  licenseExpiry  DateTime?
+  passportNumber String?
+  dateOfBirth    DateTime?
+
+  status CustomerStatus @default(REGULAR)
+  notes  String?        @db.Text
+
+  totalBookings Int     @default(0)
+  totalRevenue  Decimal @default(0) @db.Decimal(12, 2)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  reservations Reservation[]
+  reviews      Review[]
+  invoices     Invoice[]
+
+  @@index([agencyId, status])
+  @@index([agencyId, phone])
+  @@map("customers")
+}
+
+// ---------------------------------------------------------------------------
+// Reservations
+// ---------------------------------------------------------------------------
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  ONGOING
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum BookingSource {
+  WEBSITE
+  WHATSAPP
+  INSTAGRAM
+  FACEBOOK
+  GOOGLE
+  PHONE
+  WALK_IN
+  OTHER
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  REFUNDED
+}
+
+model Reservation {
+  id                String @id @default(uuid())
+  agencyId          String
+  agency            Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  reservationNumber String @unique // e.g. RF-2026-000123
+
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  status ReservationStatus @default(PENDING)
+  source BookingSource     @default(WEBSITE)
+
+  pickupDate DateTime
+  returnDate DateTime
+  pickupTime String?
+  returnTime String?
+  pickupCity String?
+  returnCity String?
+
+  flightNumber      String?
+  driverAge         Int?
+  licenseCountry    String?
+  additionalDriver  Boolean @default(false)
+  message           String? @db.Text
+
+  durationDays Int
+
+  basePrice       Decimal @db.Decimal(10, 2)
+  discountAmount  Decimal @default(0) @db.Decimal(10, 2)
+  extrasAmount    Decimal @default(0) @db.Decimal(10, 2)
+  totalPrice      Decimal @db.Decimal(10, 2)
+  depositAmount   Decimal @default(0) @db.Decimal(10, 2)
+  paymentStatus   PaymentStatus @default(UNPAID)
+
+  couponId String?
+  coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  createdBy   User?   @relation("ReservationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  notes            String? @db.Text
+  cancelledAt      DateTime?
+  cancelledReason  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  invoice              Invoice?
+  payments             Payment[]
+  notifications        Notification[]
+  availabilityBlocks   VehicleAvailability[]
+  statusHistory        ReservationStatusLog[]
+
+  @@index([agencyId, status])
+  @@index([vehicleId, pickupDate, returnDate])
+  @@index([agencyId, createdAt])
+  @@map("reservations")
+}
+
+/// Append-only status timeline for a reservation (drives the "Timeline"
+/// section on the Reservation Details screen).
+model ReservationStatusLog {
+  id            String            @id @default(uuid())
+  reservationId String
+  reservation   Reservation       @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  status    ReservationStatus
+  note      String?
+  changedById String?
+  changedBy   User?  @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([reservationId])
+  @@map("reservation_status_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Billing
+// ---------------------------------------------------------------------------
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Invoice {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  reservationId String      @unique
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  invoiceNumber String        @unique
+  status        InvoiceStatus @default(DRAFT)
+
+  subtotal       Decimal @db.Decimal(10, 2)
+  taxAmount      Decimal @default(0) @db.Decimal(10, 2)
+  discountAmount Decimal @default(0) @db.Decimal(10, 2)
+  totalAmount    Decimal @db.Decimal(10, 2)
+
+  issuedAt DateTime?
+  dueAt    DateTime?
+  paidAt   DateTime?
+  pdfUrl   String?
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([agencyId, status])
+  @@map("invoices")
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  STRIPE
+  PAYPAL
+  CMI
+  BANK_TRANSFER
+}
+
+enum PaymentTxnStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  invoiceId     String?
+  invoice       Invoice?    @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  amount         Decimal           @db.Decimal(10, 2)
+  method         PaymentMethod
+  status         PaymentTxnStatus  @default(PENDING)
+  transactionRef String?
+  paidAt         DateTime?
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([agencyId, status])
+  @@map("payments")
+}
+
+// ---------------------------------------------------------------------------
+// Engagement
+// ---------------------------------------------------------------------------
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  SYSTEM
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+/// Channel-agnostic notification record. Phase 5 wires real senders
+/// (email/SMS/WhatsApp providers); for now this is the durable outbox +
+/// in-app notification feed.
+model Notification {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  channel NotificationChannel
+  status  NotificationStatus  @default(PENDING)
+
+  title String
+  body  String @db.Text
+
+  relatedReservationId String?
+  relatedReservation    Reservation? @relation(fields: [relatedReservationId], references: [id], onDelete: SetNull)
+
+  recipientUserId String?
+  recipientEmail  String?
+  recipientPhone  String?
+
+  sentAt DateTime?
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([agencyId, status])
+  @@map("notifications")
+}
+
+model Review {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  rating      Int
+  comment     String? @db.Text
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([agencyId, isPublished])
+  @@index([vehicleId])
+  @@map("reviews")
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
+
+model Coupon {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  code String
+  type CouponType
+  value Decimal @db.Decimal(10, 2)
+
+  maxUses  Int?
+  usedCount Int @default(0)
+
+  minRentalDays Int?
+  startsAt      DateTime?
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+
+  reservations Reservation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([agencyId, code])
+  @@map("coupons")
+}
+
+// ---------------------------------------------------------------------------
+// Maintenance
+// ---------------------------------------------------------------------------
+
+enum MaintenanceType {
+  OIL_CHANGE
+  INSPECTION
+  REPAIR
+  TIRE_CHANGE
+  INSURANCE_RENEWAL
+  REGISTRATION_RENEWAL
+  OTHER
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+}
+
+model Maintenance {
+  id       String @id @default(uuid())
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  type   MaintenanceType
+  status MaintenanceStatus @default(SCHEDULED)
+
+  title       String
+  description String? @db.Text
+
+  scheduledDate DateTime?
+  completedDate DateTime?
+  cost          Decimal?  @db.Decimal(10, 2)
+  mileageAt     Int?
+
+  performedById String?
+  performedBy   User?   @relation(fields: [performedById], references: [id], onDelete: SetNull)
+
+  notes String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([agencyId, status])
+  @@index([vehicleId])
+  @@map("maintenances")
+}
+
+// ---------------------------------------------------------------------------
+// Platform: settings, logs
+// ---------------------------------------------------------------------------
+
+/// Per-agency singleton configuration.
+model Settings {
+  id       String @id @default(uuid())
+  agencyId String @unique
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  bookingLeadTimeHours    Int     @default(2)
+  minRentalDays           Int     @default(1)
+  cancellationPolicy      String? @db.Text
+  fuelPolicy              String? @db.Text
+  taxRatePercent          Decimal @default(0) @db.Decimal(5, 2)
+  depositRequired         Boolean @default(true)
+  autoConfirmReservations Boolean @default(false)
+
+  notifyEmail    Boolean @default(true)
+  notifyWhatsapp Boolean @default(false)
+  notifySms      Boolean @default(false)
+
+  socialInstagram      String?
+  socialFacebook       String?
+  socialWhatsappNumber String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+/// Lightweight "recent activity" feed shown on the dashboard home.
+model ActivityLog {
+  id       String  @id @default(uuid())
+  agencyId String
+  agency   Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action     String // e.g. "reservation.created"
+  entityType String // e.g. "Reservation"
+  entityId   String?
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([agencyId, createdAt])
+  @@map("activity_logs")
+}
+
+/// Formal audit trail — before/after diffs for compliance-sensitive changes
+/// (pricing edits, role/permission changes, cancellations, refunds...).
+model AuditLog {
+  id       String  @id @default(uuid())
+  agencyId String
+  agency   Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action     String
+  entityType String
+  entityId   String?
+  before     Json?
+  after      Json?
+  ipAddress  String?
+  userAgent  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([agencyId, entityType, entityId])
+  @@map("audit_logs")
+}
