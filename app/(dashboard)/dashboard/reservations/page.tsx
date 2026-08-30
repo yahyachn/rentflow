@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Lock } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/tenant";
@@ -53,15 +54,13 @@ export default async function ReservationsPage() {
   const canApprove = isOwnerNoRole || permissionKeys.includes("reservations.approve");
   const canInvoice = isOwnerNoRole || permissionKeys.includes("billing.manage");
 
+  const t = await getTranslations("res");
+
   if (!canView) {
     return (
       <div className="space-y-6">
-        <Header />
-        <EmptyState
-          icon={Lock}
-          title="You don't have access to reservations"
-          description="Ask an owner or manager to grant you the “View reservations” permission."
-        />
+        <Header title={t("title")} subtitle={t("subtitle")} />
+        <EmptyState icon={Lock} title={t("noAccessTitle")} description={t("noAccessDesc")} />
       </div>
     );
   }
@@ -110,7 +109,7 @@ export default async function ReservationsPage() {
 
   return (
     <div className="space-y-6">
-      <Header />
+      <Header title={t("title")} subtitle={t("subtitle")} />
       <ReservationsView
         reservations={reservations}
         vehicles={vehicles}
@@ -125,13 +124,11 @@ export default async function ReservationsPage() {
   );
 }
 
-function Header() {
+function Header({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold">Reservations</h1>
-      <p className="text-muted-foreground text-sm">
-        Bookings, pricing, and status — with automatic double-booking prevention.
-      </p>
+      <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
+      <p className="text-muted-foreground text-sm">{subtitle}</p>
     </div>
   );
 }

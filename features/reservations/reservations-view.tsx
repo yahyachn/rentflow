@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   CalendarPlus,
   CalendarRange,
@@ -70,25 +71,26 @@ import type {
   VehicleOption,
 } from "./types";
 
-const STATUS_META: Record<
+const STATUS_VARIANT: Record<
   ReservationStatusValue,
-  { label: string; variant: "warning" | "default" | "accent" | "success" | "destructive" | "secondary" }
+  "warning" | "default" | "accent" | "success" | "destructive" | "secondary"
 > = {
-  PENDING: { label: "Pending", variant: "warning" },
-  CONFIRMED: { label: "Confirmed", variant: "default" },
-  ONGOING: { label: "Ongoing", variant: "accent" },
-  COMPLETED: { label: "Completed", variant: "success" },
-  CANCELLED: { label: "Cancelled", variant: "destructive" },
-  NO_SHOW: { label: "No-show", variant: "secondary" },
+  PENDING: "warning",
+  CONFIRMED: "default",
+  ONGOING: "accent",
+  COMPLETED: "success",
+  CANCELLED: "destructive",
+  NO_SHOW: "secondary",
 };
 
-const TRANSITION_LABEL: Record<string, string> = {
-  CONFIRMED: "Confirm",
-  ONGOING: "Mark ongoing",
-  COMPLETED: "Mark completed",
-  CANCELLED: "Cancel booking",
-  NO_SHOW: "Mark no-show",
-};
+const STATUS_ORDER: ReservationStatusValue[] = [
+  "PENDING",
+  "CONFIRMED",
+  "ONGOING",
+  "COMPLETED",
+  "CANCELLED",
+  "NO_SHOW",
+];
 
 const REASON_STATES = new Set(["CANCELLED", "NO_SHOW"]);
 
@@ -111,6 +113,7 @@ export function ReservationsView({
   canApprove: boolean;
   canInvoice: boolean;
 }) {
+  const t = useTranslations("res");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | ReservationStatusValue>("ALL");
   const [newOpen, setNewOpen] = useState(false);
@@ -136,7 +139,7 @@ export function ReservationsView({
   function applyStatus(id: string, next: string, note?: string) {
     startTransition(async () => {
       const result = await updateReservationStatusAction(id, next, note);
-      if (result.ok) toast.success("Reservation updated");
+      if (result.ok) toast.success(t("updated"));
       else toast.error(result.error);
       setReasonTarget(null);
       setReason("");
@@ -161,25 +164,29 @@ export function ReservationsView({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList>
             <TabsTrigger value="list">
-              <ListIcon /> List
+              <ListIcon /> {t("tabList")}
             </TabsTrigger>
             <TabsTrigger value="timeline">
-              <CalendarRange /> Timeline
+              <CalendarRange /> {t("tabTimeline")}
             </TabsTrigger>
             {canManage && (
               <TabsTrigger value="coupons">
-                <TicketPercent /> Coupons
+                <TicketPercent /> {t("tabCoupons")}
               </TabsTrigger>
             )}
             {canManage && (
               <TabsTrigger value="reviews">
-                <Star /> Reviews
+                <Star /> {t("tabReviews")}
               </TabsTrigger>
             )}
           </TabsList>
           {canManage && (
-            <Button onClick={() => setNewOpen(true)} disabled={vehicles.length === 0}>
-              <CalendarPlus /> New reservation
+            <Button
+              onClick={() => setNewOpen(true)}
+              disabled={vehicles.length === 0}
+              className="bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground hover:opacity-95"
+            >
+              <CalendarPlus /> {t("new")}
             </Button>
           )}
         </div>
@@ -191,8 +198,8 @@ export function ReservationsView({
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search number, customer, vehicle…"
-                className="pl-9"
+                placeholder={t("searchPlaceholder")}
+                className="ps-9"
               />
             </div>
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
@@ -200,10 +207,10 @@ export function ReservationsView({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All statuses</SelectItem>
-                {(Object.keys(STATUS_META) as ReservationStatusValue[]).map((s) => (
+                <SelectItem value="ALL">{t("allStatuses")}</SelectItem>
+                {STATUS_ORDER.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {STATUS_META[s].label}
+                    {t(`s${s}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -213,16 +220,12 @@ export function ReservationsView({
       {reservations.length === 0 ? (
         <EmptyState
           icon={CalendarPlus}
-          title="No reservations yet"
-          description={
-            vehicles.length === 0
-              ? "Add a vehicle with a daily price first, then you can start booking."
-              : "Create your first booking — pricing and availability are handled for you."
-          }
+          title={t("emptyTitle")}
+          description={vehicles.length === 0 ? t("emptyNoVehicle") : t("emptyDefault")}
           action={
             canManage && vehicles.length > 0 ? (
               <Button onClick={() => setNewOpen(true)}>
-                <CalendarPlus /> New reservation
+                <CalendarPlus /> {t("new")}
               </Button>
             ) : undefined
           }
@@ -232,12 +235,12 @@ export function ReservationsView({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Reservation</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead className="hidden md:table-cell">Vehicle</TableHead>
-                <TableHead className="hidden lg:table-cell">Dates</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t("colReservation")}</TableHead>
+                <TableHead>{t("colCustomer")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("colVehicle")}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t("colDates")}</TableHead>
+                <TableHead>{t("colTotal")}</TableHead>
+                <TableHead>{t("colStatus")}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -245,7 +248,7 @@ export function ReservationsView({
               {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-muted-foreground py-10 text-center">
-                    No reservations match your filters.
+                    {t("noMatch")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -267,26 +270,24 @@ export function ReservationsView({
                           {formatDate(r.pickupDate)} → {formatDate(r.returnDate)}
                         </span>
                         <span className="text-muted-foreground block text-xs">
-                          {r.durationDays} {r.durationDays === 1 ? "day" : "days"}
+                          {t("days", { count: r.durationDays })}
                         </span>
                       </TableCell>
                       <TableCell className="tabular-nums">
                         <div>{formatCurrency(r.totalPrice)}</div>
                         {r.paymentStatus === "PAID" && (
                           <Badge variant="success" className="mt-1">
-                            Paid
+                            {t("paid")}
                           </Badge>
                         )}
                         {r.paymentStatus === "PARTIALLY_PAID" && (
                           <Badge variant="warning" className="mt-1">
-                            Partial
+                            {t("partial")}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={STATUS_META[r.status].variant}>
-                          {STATUS_META[r.status].label}
-                        </Badge>
+                        <Badge variant={STATUS_VARIANT[r.status]}>{t(`s${r.status}`)}</Badge>
                       </TableCell>
                       <TableCell>
                         {(canAct && nextStates.length > 0) || canInvoice ? (
@@ -294,7 +295,7 @@ export function ReservationsView({
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="size-8">
                                 <MoreHorizontal className="size-4" />
-                                <span className="sr-only">Actions</span>
+                                <span className="sr-only">{t("actions")}</span>
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -305,7 +306,7 @@ export function ReservationsView({
                                     variant={REASON_STATES.has(next) ? "destructive" : "default"}
                                     onClick={() => onTransition(r, next)}
                                   >
-                                    <CheckCircle2 /> {TRANSITION_LABEL[next] ?? next}
+                                    <CheckCircle2 /> {t(`t${next}`)}
                                   </DropdownMenuItem>
                                 ))}
                               {canInvoice && canAct && nextStates.length > 0 && (
@@ -313,7 +314,7 @@ export function ReservationsView({
                               )}
                               {canInvoice && (
                                 <DropdownMenuItem onClick={() => setPaymentTarget(r)}>
-                                  <CreditCard /> Record payment
+                                  <CreditCard /> {t("recordPayment")}
                                 </DropdownMenuItem>
                               )}
                               {canInvoice && (
@@ -323,7 +324,7 @@ export function ReservationsView({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                   >
-                                    <FileText /> Invoice
+                                    <FileText /> {t("invoice")}
                                   </a>
                                 </DropdownMenuItem>
                               )}
@@ -379,20 +380,17 @@ export function ReservationsView({
       <Dialog open={reasonTarget != null} onOpenChange={(o) => !o && setReasonTarget(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              {reasonTarget && TRANSITION_LABEL[reasonTarget.next]}?
-            </DialogTitle>
+            <DialogTitle>{reasonTarget && `${t(`t${reasonTarget.next}`)} ?`}</DialogTitle>
             <DialogDescription>
               {reasonTarget && (
                 <>
-                  {reasonTarget.r.reservationNumber} · {reasonTarget.r.customerName}. This frees the
-                  vehicle&apos;s dates for other bookings.
+                  {reasonTarget.r.reservationNumber} · {reasonTarget.r.customerName}. {t("reasonDesc")}
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-1.5">
-            <Label htmlFor="reason">Reason (optional)</Label>
+            <Label htmlFor="reason">{t("reasonLabel")}</Label>
             <Textarea
               id="reason"
               rows={2}
@@ -402,7 +400,7 @@ export function ReservationsView({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReasonTarget(null)} disabled={pending}>
-              Back
+              {t("back")}
             </Button>
             <Button
               variant="destructive"
@@ -411,7 +409,7 @@ export function ReservationsView({
               }
               disabled={pending}
             >
-              {pending ? "Working…" : "Confirm"}
+              {pending ? t("working") : t("confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
