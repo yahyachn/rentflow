@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { isCloudinaryConfigured, signUpload, type UploadSignature } from "@/lib/cloudinary";
 import { requireUser, userHasPermission } from "@/lib/tenant";
+import { logActivity } from "@/services/activity";
 import * as fleet from "@/services/fleet";
 import {
   categorySchema,
@@ -109,6 +110,14 @@ export async function createVehicleAction(input: VehicleInput): Promise<ActionRe
   try {
     const user = await requireFleetManage();
     await fleet.createVehicle(user.agencyId, parsed.data);
+    await logActivity(
+      user.agencyId,
+      user.id,
+      "vehicle.created",
+      "Vehicle",
+      null,
+      `${parsed.data.brand} ${parsed.data.model}`,
+    );
     revalidateFleet();
     return { ok: true };
   } catch (err) {
@@ -148,6 +157,7 @@ export async function archiveVehicleAction(id: string): Promise<ActionResult> {
   try {
     const user = await requireFleetManage();
     await fleet.archiveVehicle(user.agencyId, id);
+    await logActivity(user.agencyId, user.id, "vehicle.archived", "Vehicle", id);
     revalidateFleet();
     return { ok: true };
   } catch (err) {

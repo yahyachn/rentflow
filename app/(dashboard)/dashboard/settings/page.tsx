@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 
 import { getCurrentUser } from "@/lib/tenant";
+import { listActivity } from "@/services/activity";
 import { listTeam } from "@/services/team";
 import { listRolesDetailed } from "@/services/roles";
+import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgencyProfileForm, type AgencyProfileValues } from "@/features/settings/agency-profile-form";
@@ -11,6 +13,17 @@ import { RolesManager, type RoleDTO } from "@/features/roles/roles-manager";
 import { CURRENCY_OPTIONS } from "@/validators/settings";
 
 export const metadata: Metadata = { title: "Settings" };
+
+const ACTIVITY_LABEL: Record<string, string> = {
+  "reservation.created": "Created a reservation",
+  "reservation.status": "Changed reservation status",
+  "payment.recorded": "Recorded a payment",
+  "vehicle.created": "Added a vehicle",
+  "vehicle.archived": "Archived a vehicle",
+  "customer.created": "Added a customer",
+  "team.role": "Changed a member's role",
+  "team.status": "Changed a member's status",
+};
 
 export default async function SettingsPage() {
   const user = await getCurrentUser();
@@ -61,6 +74,22 @@ export default async function SettingsPage() {
       memberCount: r._count.users,
     }));
   }
+
+  const activityRows = canEditSettings ? await listActivity(agency.id) : [];
+  const activity = activityRows.map((a) => {
+    const meta = a.metadata;
+    const detail =
+      meta && typeof meta === "object" && !Array.isArray(meta)
+        ? ((meta as Record<string, unknown>).detail as string | undefined)
+        : undefined;
+    return {
+      id: a.id,
+      label: ACTIVITY_LABEL[a.action] ?? a.action,
+      detail,
+      user: a.user?.name ?? "System",
+      createdAt: a.createdAt,
+    };
+  });
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -142,6 +171,42 @@ export default async function SettingsPage() {
           </CardHeader>
           <CardContent>
             <RolesManager roles={roleDTOs} />
+          </CardContent>
+        </Card>
+      )}
+
+      {canEditSettings && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent activity</CardTitle>
+            <CardDescription>An audit trail of recent changes across your agency.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activity.length === 0 ? (
+              <p className="text-muted-foreground text-sm">No activity recorded yet.</p>
+            ) : (
+              <ul className="divide-y">
+                {activity.map((a) => (
+                  <li key={a.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                    <div className="min-w-0">
+                      <p className="truncate">
+                        <span className="font-medium">{a.label}</span>
+                        {a.detail ? <span className="text-muted-foreground"> · {a.detail}</span> : null}
+                      </p>
+                      <p className="text-muted-foreground text-xs">{a.user}</p>
+                    </div>
+                    <span className="text-muted-foreground shrink-0 text-xs">
+                      {formatDate(a.createdAt, {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
       )}

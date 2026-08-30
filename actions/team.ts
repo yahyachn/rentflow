@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { UserStatus } from "@prisma/client";
 
 import { requireUser, userHasPermission } from "@/lib/tenant";
+import { logActivity } from "@/services/activity";
 import { assignRole, setMemberStatus } from "@/services/team";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -34,6 +35,7 @@ export async function assignRoleAction(userId: string, roleId: string): Promise<
   try {
     const user = await requireTeamManage();
     await assignRole(user.agencyId, user.id, userId, roleId);
+    await logActivity(user.agencyId, user.id, "team.role", "User", userId);
     revalidatePath("/dashboard/settings");
     return { ok: true };
   } catch (err) {
@@ -51,6 +53,7 @@ export async function setMemberStatusAction(
   try {
     const user = await requireTeamManage();
     await setMemberStatus(user.agencyId, user.id, userId, status);
+    await logActivity(user.agencyId, user.id, "team.status", "User", userId, status);
     revalidatePath("/dashboard/settings");
     return { ok: true };
   } catch (err) {

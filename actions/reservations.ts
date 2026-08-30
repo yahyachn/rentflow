@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { ReservationStatus } from "@prisma/client";
 
 import { requireUser, userHasPermission } from "@/lib/tenant";
+import { logActivity } from "@/services/activity";
 import * as reservations from "@/services/reservations";
 import { reservationSchema, type ReservationInput } from "@/validators/reservation";
 
@@ -76,7 +77,15 @@ export async function createReservationAction(input: ReservationInput): Promise<
   }
   try {
     const user = await requireAnyPermission("reservations.manage");
-    await reservations.createReservation(user.agencyId, user.id, parsed.data);
+    const reservation = await reservations.createReservation(user.agencyId, user.id, parsed.data);
+    await logActivity(
+      user.agencyId,
+      user.id,
+      "reservation.created",
+      "Reservation",
+      reservation.id,
+      reservation.reservationNumber,
+    );
     revalidateReservations();
     return { ok: true };
   } catch (err) {
@@ -108,6 +117,7 @@ export async function updateReservationStatusAction(
       next as ReservationStatus,
       note,
     );
+    await logActivity(user.agencyId, user.id, "reservation.status", "Reservation", id, next);
     revalidateReservations();
     return { ok: true };
   } catch (err) {

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireUser, userHasPermission } from "@/lib/tenant";
+import { logActivity } from "@/services/activity";
 import { recordPayment } from "@/services/payments";
 import { paymentSchema, type PaymentInput } from "@/validators/payment";
 
@@ -34,6 +35,14 @@ export async function recordPaymentAction(input: PaymentInput): Promise<PaymentA
       return { ok: false, error: "You don't have permission to record payments." };
     }
     await recordPayment(user.agencyId, parsed.data);
+    await logActivity(
+      user.agencyId,
+      user.id,
+      "payment.recorded",
+      "Reservation",
+      parsed.data.reservationId,
+      `${parsed.data.amount} ${parsed.data.method}`,
+    );
     revalidatePath("/dashboard/reservations");
     revalidatePath("/dashboard");
     return { ok: true };

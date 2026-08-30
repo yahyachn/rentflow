@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireUser, userHasPermission } from "@/lib/tenant";
+import { logActivity } from "@/services/activity";
 import * as customers from "@/services/customers";
 import { customerSchema, type CustomerInput } from "@/validators/customer";
 
@@ -54,6 +55,14 @@ export async function createCustomerAction(input: CustomerInput): Promise<Action
   try {
     const user = await requireCustomerManage();
     await customers.createCustomer(user.agencyId, parsed.data);
+    await logActivity(
+      user.agencyId,
+      user.id,
+      "customer.created",
+      "Customer",
+      null,
+      `${parsed.data.firstName} ${parsed.data.lastName}`,
+    );
     revalidateCustomers();
     return { ok: true };
   } catch (err) {
