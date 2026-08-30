@@ -169,4 +169,202 @@
     @apply bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+  /* Arabic gets its own display/body face; applied when <html dir="rtl">. */
+  [dir="rtl"] {
+    --font-sans: "Noto Sans Arabic Variable", "Inter Variable", sans-serif;
+    --font-display: "Noto Sans Arabic Variable", "Lexend Variable", sans-serif;
+  }
+}
+
+/* ================================================================== */
+/* DARK-LUXURY MARKETING SHELL                                         */
+/* The public site always renders in the premium dark palette,        */
+/* independent of the dashboard's light/dark theme toggle.            */
+/* ================================================================== */
+.marketing-shell {
+  color-scheme: dark;
+
+  --background: oklch(0.135 0.021 264);
+  --foreground: oklch(0.97 0.005 265);
+
+  --card: oklch(0.185 0.026 265);
+  --card-foreground: oklch(0.97 0.005 265);
+  --popover: oklch(0.17 0.024 265);
+  --popover-foreground: oklch(0.97 0.005 265);
+
+  --primary: oklch(0.66 0.19 262);
+  --primary-foreground: oklch(0.12 0.02 265);
+
+  --secondary: oklch(0.26 0.03 265);
+  --secondary-foreground: oklch(0.97 0.005 265);
+
+  --muted: oklch(0.24 0.025 265);
+  --muted-foreground: oklch(0.72 0.02 265);
+
+  --accent: oklch(0.696 0.148 162.5);
+  --accent-foreground: oklch(0.13 0.03 165);
+
+  /* Luxury warm-gold accent, unique to the marketing surface. */
+  --gold: oklch(0.83 0.13 84);
+  --gold-soft: oklch(0.9 0.09 90);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.66 0.19 262);
+
+  background-color: oklch(0.115 0.02 264);
+  background-image:
+    radial-gradient(
+      42rem 42rem at 82% -8%,
+      color-mix(in oklch, var(--primary) 26%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      38rem 38rem at 5% 8%,
+      color-mix(in oklch, var(--gold) 12%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      50rem 40rem at 50% 120%,
+      color-mix(in oklch, var(--accent) 12%, transparent),
+      transparent 60%
+    );
+  background-attachment: fixed;
+}
+
+/* Fine dotted grid overlay for depth (sits behind content). */
+.grid-overlay {
+  background-image: radial-gradient(
+    color-mix(in oklch, var(--foreground) 8%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 34px 34px;
+  mask-image: radial-gradient(75% 60% at 50% 0%, #000 20%, transparent 75%);
+}
+
+@layer components {
+  /* Frosted glass surfaces */
+  .glass {
+    background: color-mix(in oklch, var(--foreground) 5%, transparent);
+    border: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+  .glass-strong {
+    background: color-mix(in oklch, var(--foreground) 9%, transparent);
+    border: 1px solid color-mix(in oklch, var(--foreground) 16%, transparent);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    box-shadow:
+      0 1px 0 0 color-mix(in oklch, var(--foreground) 12%, transparent) inset,
+      0 24px 60px -24px oklch(0 0 0 / 55%);
+  }
+
+  /* Gradient clip text */
+  .text-gradient {
+    background: linear-gradient(
+      100deg,
+      var(--foreground) 0%,
+      color-mix(in oklch, var(--primary) 70%, white) 45%,
+      var(--gold) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-shimmer {
+    background: linear-gradient(
+      100deg,
+      var(--foreground),
+      var(--gold),
+      color-mix(in oklch, var(--primary) 80%, white),
+      var(--foreground)
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
+
+  /* Glow rings for hero elements / primary CTAs */
+  .glow-primary {
+    box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--primary) 40%, transparent),
+      0 12px 40px -8px color-mix(in oklch, var(--primary) 55%, transparent);
+  }
+  .glow-gold {
+    box-shadow: 0 12px 44px -10px color-mix(in oklch, var(--gold) 55%, transparent);
+  }
+}
+
+@layer utilities {
+  /* Sheen sweep on hover — add to any button/anchor */
+  .sheen {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      color-mix(in oklch, white 35%, transparent) 50%,
+      transparent 70%
+    );
+    transform: translateX(-130%);
+    transition: transform 0.7s ease;
+    z-index: -1;
+  }
+  .sheen:hover::after {
+    transform: translateX(130%);
+  }
+
+  .animate-float {
+    animation: float 7s ease-in-out infinite;
+  }
+  .animate-float-slow {
+    animation: float 11s ease-in-out infinite;
+  }
+  .animate-pulse-glow {
+    animation: pulseGlow 4.5s ease-in-out infinite;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: 250% 0;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+@keyframes pulseGlow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-slow,
+  .animate-pulse-glow,
+  .text-gradient-shimmer {
+    animation: none !important;
+  }
 }

@@ -1,0 +1,39 @@
+{
+  "common": {
+    "language": "Langue",
+    "signIn": "Connexion",
+    "startTrial": "Essai gratuit",
+    "search": "Rechercher",
+    "viewAll": "Tout voir",
+    "learnMore": "En savoir plus",
+    "bookNow": "Réserver",
+    "perDay": "/ jour",
+    "from": "À partir de"
+  },
+  "nav": {
+    "home": "Accueil",
+    "vehicles": "Véhicules",
+    "about": "À propos",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "menu": "Menu"
+  },
+  "hero": {
+    "badge": "Réservation partout au Maroc",
+    "titleLine1": "Louez votre",
+    "titleHighlight": "prochaine évasion",
+    "titleLine2": "voiture ou moto, sans effort.",
+    "subtitle": "Tarifs transparents, véhicules vérifiés et réservation instantanée — directement depuis une flotte gérée sur RentFlow.",
+    "cityPlaceholder": "Ville de prise en charge",
+    "typePlaceholder": "Type de véhicule",
+    "cars": "Voitures",
+    "motorcycles": "Motos",
+    "searchCta": "Rechercher un véhicule",
+    "statVehicles": "Véhicules disponibles",
+    "statSupport": "Assistance",
+    "statBooking": "Réservation en ligne",
+    "trustNote": "Sans engagement · Confirmation rapide · Paiement à l'agence",
+    "cardTitle": "Prêt à partir",
+    "cardSubtitle": "Confirmation instantanée"
+  }
+}

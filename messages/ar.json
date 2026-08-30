@@ -1,0 +1,39 @@
+{
+  "common": {
+    "language": "اللغة",
+    "signIn": "تسجيل الدخول",
+    "startTrial": "تجربة مجانية",
+    "search": "بحث",
+    "viewAll": "عرض الكل",
+    "learnMore": "اعرف المزيد",
+    "bookNow": "احجز الآن",
+    "perDay": "/ يوم",
+    "from": "ابتداءً من"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "vehicles": "المركبات",
+    "about": "من نحن",
+    "faq": "الأسئلة الشائعة",
+    "contact": "اتصل بنا",
+    "menu": "القائمة"
+  },
+  "hero": {
+    "badge": "الحجز متاح في جميع أنحاء المغرب",
+    "titleLine1": "استأجر",
+    "titleHighlight": "رحلتك القادمة",
+    "titleLine2": "سيارة أو دراجة نارية، بكل سهولة.",
+    "subtitle": "أسعار شفافة، مركبات موثوقة، وطلبات حجز فورية — مباشرةً من أسطول يُدار عبر RentFlow.",
+    "cityPlaceholder": "مدينة الاستلام",
+    "typePlaceholder": "نوع المركبة",
+    "cars": "سيارات",
+    "motorcycles": "دراجات نارية",
+    "searchCta": "ابحث عن مركبة",
+    "statVehicles": "مركبة متاحة",
+    "statSupport": "الدعم",
+    "statBooking": "حجز عبر الإنترنت",
+    "trustNote": "بدون التزام · تأكيد سريع · الدفع في الوكالة",
+    "cardTitle": "جاهزة للانطلاق",
+    "cardSubtitle": "تأكيد فوري"
+  }
+}

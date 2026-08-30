@@ -1,0 +1,39 @@
+{
+  "common": {
+    "language": "Language",
+    "signIn": "Sign in",
+    "startTrial": "Start free trial",
+    "search": "Search",
+    "viewAll": "View all",
+    "learnMore": "Learn more",
+    "bookNow": "Book now",
+    "perDay": "/ day",
+    "from": "From"
+  },
+  "nav": {
+    "home": "Home",
+    "vehicles": "Vehicles",
+    "about": "About",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "menu": "Menu"
+  },
+  "hero": {
+    "badge": "Now booking across Morocco",
+    "titleLine1": "Rent your",
+    "titleHighlight": "next escape",
+    "titleLine2": "car or motorcycle, hassle-free.",
+    "subtitle": "Transparent pricing, verified vehicles, and instant reservation requests — straight from a fleet run on RentFlow.",
+    "cityPlaceholder": "Pickup city",
+    "typePlaceholder": "Vehicle type",
+    "cars": "Cars",
+    "motorcycles": "Motorcycles",
+    "searchCta": "Search vehicles",
+    "statVehicles": "Vehicles available",
+    "statSupport": "Support",
+    "statBooking": "Online booking",
+    "trustNote": "No commitment · Fast confirmation · Pay at the agency",
+    "cardTitle": "Ready to go",
+    "cardSubtitle": "Instant confirmation"
+  }
+}
