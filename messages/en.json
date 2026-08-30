@@ -5,6 +5,7 @@
     "startTrial": "Start free trial",
     "search": "Search",
     "viewAll": "View all",
+    "all": "All",
     "learnMore": "Learn more",
     "bookNow": "Book now",
     "perDay": "/ day",
@@ -120,5 +121,21 @@
     "faq": "FAQ",
     "privacy": "Privacy policy",
     "terms": "Terms of service"
+  },
+  "vehiclesPage": {
+    "title": "Our fleet",
+    "subtitle": "{count, plural, one {# vehicle available} other {# vehicles available}} right now.",
+    "noMatchTitle": "No vehicles match this filter",
+    "noMatchDesc": "Try a different category, or view the full fleet."
+  },
+  "about": {
+    "title": "About {name}",
+    "introFallback": "{name} is a car and motorcycle rental agency based in {city}, offering a well-maintained fleet with transparent pricing and straightforward booking.",
+    "verifiedTitle": "Verified fleet",
+    "verifiedDesc": "Every vehicle is inspected and insured before it's listed for rent.",
+    "maintenanceTitle": "Regular maintenance",
+    "maintenanceDesc": "Scheduled servicing keeps every car and motorcycle road-ready.",
+    "localTitle": "Local expertise",
+    "localDesc": "Based in {city}, with pickup and return options nearby."
   }
 }

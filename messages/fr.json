@@ -5,6 +5,7 @@
     "startTrial": "Essai gratuit",
     "search": "Rechercher",
     "viewAll": "Tout voir",
+    "all": "Tous",
     "learnMore": "En savoir plus",
     "bookNow": "Réserver",
     "perDay": "/ jour",
@@ -120,5 +121,21 @@
     "faq": "FAQ",
     "privacy": "Politique de confidentialité",
     "terms": "Conditions d'utilisation"
+  },
+  "vehiclesPage": {
+    "title": "Notre flotte",
+    "subtitle": "{count, plural, one {# véhicule disponible} other {# véhicules disponibles}} en ce moment.",
+    "noMatchTitle": "Aucun véhicule ne correspond à ce filtre",
+    "noMatchDesc": "Essayez une autre catégorie, ou consultez toute la flotte."
+  },
+  "about": {
+    "title": "À propos de {name}",
+    "introFallback": "{name} est une agence de location de voitures et de motos basée à {city}, proposant une flotte bien entretenue, des tarifs transparents et une réservation simple.",
+    "verifiedTitle": "Flotte vérifiée",
+    "verifiedDesc": "Chaque véhicule est inspecté et assuré avant d'être proposé à la location.",
+    "maintenanceTitle": "Entretien régulier",
+    "maintenanceDesc": "Un entretien programmé garde chaque voiture et moto prête à rouler.",
+    "localTitle": "Expertise locale",
+    "localDesc": "Basée à {city}, avec des options de prise en charge et de retour à proximité."
   }
 }
