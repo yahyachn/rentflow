@@ -1,8 +1,10 @@
+import { useTranslations } from "next-intl";
+
+import { Reveal } from "@/components/marketing/reveal";
+
 /**
- * Deliberately shows only numbers we can actually back with real data
- * (fleet size, categories) plus non-numeric policy statements — no
- * fabricated "500+ happy customers"-style claims. Swap/extend once
- * Phase 3 reservation data exists to compute real booking-derived stats.
+ * Shows only numbers we can actually back with real data (fleet size,
+ * categories) plus non-numeric policy statements — no fabricated claims.
  */
 export function StatsSection({
   vehicleCount,
@@ -11,22 +13,31 @@ export function StatsSection({
   vehicleCount: number;
   categoryCount: number;
 }) {
+  const t = useTranslations("stats");
+
   const stats = [
-    { value: String(vehicleCount), label: "Vehicles in fleet" },
-    { value: String(categoryCount), label: "Categories available" },
-    { value: "Insured", label: "Every rental, by default" },
-    { value: "Same-day", label: "Reservation confirmation" },
+    { value: String(vehicleCount), label: t("fleet") },
+    { value: String(categoryCount), label: t("categories") },
+    { value: t("insuredValue"), label: t("insuredLabel") },
+    { value: t("samedayValue"), label: t("samedayLabel") },
   ];
 
   return (
-    <section className="bg-secondary text-secondary-foreground">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-14 lg:grid-cols-4 lg:px-6">
-        {stats.map((stat) => (
-          <div key={stat.label} className="text-center">
-            <p className="font-display text-3xl font-semibold sm:text-4xl">{stat.value}</p>
-            <p className="text-secondary-foreground/60 mt-1 text-sm">{stat.label}</p>
+    <section className="relative overflow-hidden py-4">
+      <div className="mx-auto max-w-6xl px-4 lg:px-6">
+        <div className="glass-strong relative overflow-hidden rounded-3xl px-6 py-12 lg:px-12">
+          <div className="pointer-events-none absolute -top-20 start-1/2 size-72 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
+          <div className="relative grid grid-cols-2 gap-8 lg:grid-cols-4">
+            {stats.map((stat, i) => (
+              <Reveal key={stat.label} delay={i * 0.08} className="text-center">
+                <p className="font-display text-3xl font-semibold sm:text-4xl">
+                  <span className="text-gradient">{stat.value}</span>
+                </p>
+                <p className="text-muted-foreground mt-2 text-sm">{stat.label}</p>
+              </Reveal>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </section>
   );

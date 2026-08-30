@@ -35,5 +35,90 @@
     "trustNote": "No commitment · Fast confirmation · Pay at the agency",
     "cardTitle": "Ready to go",
     "cardSubtitle": "Instant confirmation"
+  },
+  "vehicleCard": {
+    "available": "Available",
+    "featured": "Featured",
+    "seats": "{count} seats",
+    "perDay": "/ day",
+    "contactPricing": "Contact for pricing",
+    "viewDetails": "View details",
+    "noImage": "No image",
+    "transmission": {
+      "AUTOMATIC": "Automatic",
+      "MANUAL": "Manual",
+      "SEMI_AUTOMATIC": "Semi-auto"
+    },
+    "fuel": {
+      "PETROL": "Petrol",
+      "DIESEL": "Diesel",
+      "ELECTRIC": "Electric",
+      "HYBRID": "Hybrid"
+    }
+  },
+  "grid": {
+    "featuredTitle": "Featured vehicles",
+    "featuredDesc": "Hand-picked from our fleet.",
+    "latestTitle": "Latest additions",
+    "latestDesc": "Recently added to the fleet."
+  },
+  "categories": {
+    "title": "Browse by category",
+    "subtitle": "Find the right fit for your trip.",
+    "count": "{count, plural, one {# vehicle} other {# vehicles}}"
+  },
+  "why": {
+    "title": "Why rent with us",
+    "subtitle": "Built on RentFlow — the same platform trusted by rental agencies to run their fleet and bookings.",
+    "verifiedTitle": "Verified fleet",
+    "verifiedDesc": "Every vehicle is inspected and insured before it's listed.",
+    "pricingTitle": "Transparent pricing",
+    "pricingDesc": "No hidden fees — daily, weekly, and monthly rates upfront.",
+    "confirmationTitle": "Fast confirmation",
+    "confirmationDesc": "Reservation requests are reviewed and confirmed within hours.",
+    "insuranceTitle": "Insurance included",
+    "insuranceDesc": "Every rental comes with baseline coverage, deposit clearly stated."
+  },
+  "stats": {
+    "fleet": "Vehicles in fleet",
+    "categories": "Categories available",
+    "insuredValue": "Insured",
+    "insuredLabel": "Every rental, by default",
+    "samedayValue": "Same-day",
+    "samedayLabel": "Reservation confirmation"
+  },
+  "how": {
+    "title": "How it works",
+    "step": "STEP {n}",
+    "searchTitle": "Search & compare",
+    "searchDesc": "Filter by type, dates, and city to find the right vehicle.",
+    "requestTitle": "Request a reservation",
+    "requestDesc": "Submit your dates and details — we confirm within hours.",
+    "pickupTitle": "Pick up & go",
+    "pickupDesc": "Show up at the agreed time and city, sign the paperwork, drive off."
+  },
+  "reviews": {
+    "title": "What customers say"
+  },
+  "cta": {
+    "title": "Ready to hit the road?",
+    "subtitle": "Browse the full fleet and send a reservation request in minutes.",
+    "button": "Browse vehicles"
+  },
+  "footer": {
+    "tagline": "The rental management platform for car and motorcycle agencies.",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "rights": "All rights reserved.",
+    "vehicles": "Vehicles",
+    "cars": "Cars",
+    "motorcycles": "Motorcycles",
+    "services": "Services",
+    "about": "About us",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "privacy": "Privacy policy",
+    "terms": "Terms of service"
   }
 }

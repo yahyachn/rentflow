@@ -229,7 +229,7 @@
       color-mix(in oklch, var(--accent) 12%, transparent),
       transparent 60%
     );
-  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 /* Fine dotted grid overlay for depth (sits behind content). */

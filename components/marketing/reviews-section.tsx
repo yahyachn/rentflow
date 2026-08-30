@@ -1,52 +1,58 @@
+import { getTranslations } from "next-intl/server";
 import { Star } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent } from "@/components/ui/card";
 import { initials } from "@/lib/utils";
+import { Reveal } from "@/components/marketing/reveal";
 
 /**
  * Renders real, published customer reviews (Review.isPublished = true).
- * Intentionally has no fallback fake testimonials — an agency with no
- * reviews yet simply doesn't render this section, rather than showing
- * fabricated quotes. Reviews go live once Phase 3 wires up the post-rental
- * review flow.
+ * No fabricated testimonials — an agency with no reviews simply omits it.
  */
 export async function ReviewsSection({ agencyId }: { agencyId: string }) {
-  const reviews = await prisma.review.findMany({
-    where: { agencyId, isPublished: true },
-    include: { customer: true, vehicle: true },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+  const [reviews, t] = await Promise.all([
+    prisma.review.findMany({
+      where: { agencyId, isPublished: true },
+      include: { customer: true, vehicle: true },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    }),
+    getTranslations("reviews"),
+  ]);
 
   if (reviews.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 lg:px-6">
-      <div className="mx-auto max-w-xl text-center">
-        <h2 className="font-display text-3xl font-semibold">What customers say</h2>
-      </div>
-      <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {reviews.map((review) => (
-          <Card key={review.id}>
-            <CardContent className="space-y-3">
+    <section className="mx-auto max-w-6xl px-4 py-16 lg:px-6 lg:py-20">
+      <Reveal className="mx-auto max-w-xl text-center">
+        <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+          {t("title")}
+        </h2>
+      </Reveal>
+
+      <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+        {reviews.map((review, i) => (
+          <Reveal key={review.id} delay={i * 0.07}>
+            <figure className="glass h-full space-y-4 rounded-2xl p-6">
               <div className="flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
+                {Array.from({ length: 5 }).map((_, idx) => (
                   <Star
-                    key={i}
+                    key={idx}
                     className={
-                      i < review.rating
-                        ? "fill-warning text-warning size-4"
+                      idx < review.rating
+                        ? "size-4 fill-[var(--gold)] text-[var(--gold)]"
                         : "text-muted size-4"
                     }
                   />
                 ))}
               </div>
               {review.comment && (
-                <p className="text-muted-foreground text-sm">&ldquo;{review.comment}&rdquo;</p>
+                <blockquote className="text-foreground/90 text-sm leading-relaxed">
+                  &ldquo;{review.comment}&rdquo;
+                </blockquote>
               )}
-              <div className="flex items-center gap-2 pt-2">
-                <span className="bg-secondary text-secondary-foreground flex size-8 items-center justify-center rounded-full text-xs font-medium">
+              <figcaption className="flex items-center gap-3 border-t border-white/10 pt-4">
+                <span className="text-primary-foreground flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[var(--gold)] text-xs font-semibold">
                   {initials(`${review.customer.firstName} ${review.customer.lastName}`)}
                 </span>
                 <div>
@@ -57,9 +63,9 @@ export async function ReviewsSection({ agencyId }: { agencyId: string }) {
                     {review.vehicle.brand} {review.vehicle.model}
                   </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </figcaption>
+            </figure>
+          </Reveal>
         ))}
       </div>
     </section>

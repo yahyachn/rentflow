@@ -35,5 +35,90 @@
     "trustNote": "Sans engagement · Confirmation rapide · Paiement à l'agence",
     "cardTitle": "Prêt à partir",
     "cardSubtitle": "Confirmation instantanée"
+  },
+  "vehicleCard": {
+    "available": "Disponible",
+    "featured": "En vedette",
+    "seats": "{count} places",
+    "perDay": "/ jour",
+    "contactPricing": "Prix sur demande",
+    "viewDetails": "Voir les détails",
+    "noImage": "Pas d'image",
+    "transmission": {
+      "AUTOMATIC": "Automatique",
+      "MANUAL": "Manuelle",
+      "SEMI_AUTOMATIC": "Semi-auto"
+    },
+    "fuel": {
+      "PETROL": "Essence",
+      "DIESEL": "Diesel",
+      "ELECTRIC": "Électrique",
+      "HYBRID": "Hybride"
+    }
+  },
+  "grid": {
+    "featuredTitle": "Véhicules en vedette",
+    "featuredDesc": "Sélectionnés avec soin dans notre flotte.",
+    "latestTitle": "Derniers ajouts",
+    "latestDesc": "Récemment ajoutés à la flotte."
+  },
+  "categories": {
+    "title": "Parcourir par catégorie",
+    "subtitle": "Trouvez le véhicule adapté à votre voyage.",
+    "count": "{count, plural, one {# véhicule} other {# véhicules}}"
+  },
+  "why": {
+    "title": "Pourquoi louer chez nous",
+    "subtitle": "Propulsé par RentFlow — la plateforme sur laquelle les agences gèrent leur flotte et leurs réservations.",
+    "verifiedTitle": "Flotte vérifiée",
+    "verifiedDesc": "Chaque véhicule est inspecté et assuré avant d'être proposé.",
+    "pricingTitle": "Tarifs transparents",
+    "pricingDesc": "Aucun frais caché — tarifs journaliers, hebdomadaires et mensuels affichés.",
+    "confirmationTitle": "Confirmation rapide",
+    "confirmationDesc": "Les demandes de réservation sont traitées et confirmées en quelques heures.",
+    "insuranceTitle": "Assurance incluse",
+    "insuranceDesc": "Chaque location inclut une couverture de base, caution clairement indiquée."
+  },
+  "stats": {
+    "fleet": "Véhicules dans la flotte",
+    "categories": "Catégories disponibles",
+    "insuredValue": "Assuré",
+    "insuredLabel": "Chaque location, par défaut",
+    "samedayValue": "Le jour même",
+    "samedayLabel": "Confirmation de réservation"
+  },
+  "how": {
+    "title": "Comment ça marche",
+    "step": "ÉTAPE {n}",
+    "searchTitle": "Rechercher et comparer",
+    "searchDesc": "Filtrez par type, dates et ville pour trouver le bon véhicule.",
+    "requestTitle": "Demander une réservation",
+    "requestDesc": "Envoyez vos dates et informations — nous confirmons en quelques heures.",
+    "pickupTitle": "Récupérer et partir",
+    "pickupDesc": "Présentez-vous à l'heure et au lieu convenus, signez, et roulez."
+  },
+  "reviews": {
+    "title": "Ce que disent nos clients"
+  },
+  "cta": {
+    "title": "Prêt à prendre la route ?",
+    "subtitle": "Parcourez toute la flotte et envoyez une demande de réservation en quelques minutes.",
+    "button": "Parcourir les véhicules"
+  },
+  "footer": {
+    "tagline": "La plateforme de gestion de location pour agences de voitures et motos.",
+    "product": "Produit",
+    "company": "Entreprise",
+    "legal": "Légal",
+    "rights": "Tous droits réservés.",
+    "vehicles": "Véhicules",
+    "cars": "Voitures",
+    "motorcycles": "Motos",
+    "services": "Services",
+    "about": "À propos",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation"
   }
 }
