@@ -58,6 +58,37 @@ export function recentReservations(agencyId: string, take = 5) {
   });
 }
 
+const DETAIL_INCLUDE = {
+  vehicle: {
+    select: {
+      id: true,
+      brand: true,
+      model: true,
+      year: true,
+      type: true,
+      slug: true,
+      images: { where: { isCover: true }, take: 1, select: { url: true } },
+    },
+  },
+  customer: true,
+  createdBy: { select: { name: true } },
+  statusHistory: {
+    orderBy: { createdAt: "asc" as const },
+    include: { changedBy: { select: { name: true } } },
+  },
+  payments: { orderBy: { createdAt: "desc" as const } },
+  invoice: { select: { id: true, invoiceNumber: true, status: true, totalAmount: true } },
+} as const;
+
+export type ReservationDetail = Prisma.ReservationGetPayload<{ include: typeof DETAIL_INCLUDE }>;
+
+export function getReservationDetail(agencyId: string, id: string) {
+  return prisma.reservation.findFirst({
+    where: { id, agencyId, deletedAt: null },
+    include: DETAIL_INCLUDE,
+  });
+}
+
 /** Whole days between two dates, minimum 1 (the validator already guarantees
  * return > pickup). */
 export function durationInDays(pickup: Date, ret: Date) {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import {
   CalendarPlus,
@@ -232,7 +233,11 @@ export function ReservationsView({
                   const nextStates = RESERVATION_TRANSITIONS[r.status] ?? [];
                   return (
                     <TableRow key={r.id}>
-                      <TableCell className="font-medium">{r.reservationNumber}</TableCell>
+                      <TableCell className="font-medium">
+                        <Link href={`/dashboard/reservations/${r.id}`} className="hover:text-primary hover:underline">
+                          {r.reservationNumber}
+                        </Link>
+                      </TableCell>
                       <TableCell>{r.customerName}</TableCell>
                       <TableCell className="hidden md:table-cell">
                         <span className="text-muted-foreground text-sm">{r.vehicleLabel}</span>
