@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 import { getMarketingAgency } from "@/lib/public-agency";
+import { rateLimit } from "@/lib/rate-limit";
 import { createReservation } from "@/services/reservations";
 import { reservationSchema, type ReservationInput } from "@/validators/reservation";
 
@@ -50,6 +52,15 @@ function messageFor(err: unknown): string {
 export async function createPublicReservationAction(
   input: ReservationInput,
 ): Promise<PublicReservationResult> {
+  // Rate limit by client IP — this is a public, unauthenticated write.
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
+  const limited = rateLimit(`public-reservation:${ip}`, 5, 10 * 60 * 1000);
+  if (!limited.ok) {
+    return { ok: false, error: "Too many booking requests. Please try again in a few minutes." };
+  }
+
   // Force the source server-side; never trust a client-supplied value here.
   const parsed = reservationSchema.safeParse({ ...input, source: "WEBSITE" });
   if (!parsed.success) {

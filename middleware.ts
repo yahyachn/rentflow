@@ -2,37 +2,58 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 /**
- * Edge-safe route guard: checks for the *presence* of a valid-looking
- * session cookie (no DB call — that's deliberate, middleware runs on every
- * request). The dashboard layout itself calls `getCurrentUser()` (which
- * does hit the DB) to resolve the real user/agency and permissions, so a
- * forged/expired cookie still can't get past that second check — this
- * layer only exists to bounce obviously-signed-out visitors before they
- * render a single byte of the dashboard.
+ * Two jobs:
+ *   1. Multi-tenant subdomain resolution — turn `{agency}.rentflow.ma` (or
+ *      `{agency}.localhost` in dev) into an `x-agency-subdomain` request header
+ *      that the marketing pages read via lib/public-agency.ts. The header is
+ *      always stripped from the incoming request first, so a client can't spoof
+ *      it — it only ever reflects the real Host.
+ *   2. Edge auth guard — bounce signed-out visitors off /dashboard and signed-in
+ *      visitors off the auth pages (the real check still happens in the
+ *      dashboard layout via getCurrentUser).
  */
-const AUTH_ROUTES = ["/login", "/register"];
-const PROTECTED_PREFIX = "/dashboard";
 
-export async function middleware(request: NextRequest) {
-  const sessionCookie = getSessionCookie(request);
+const BASE_DOMAIN = "rentflow.ma";
+const AUTH_ROUTES = ["/login", "/register"];
+
+function extractSubdomain(host: string): string | null {
+  const h = host.split(":")[0].toLowerCase();
+  let label: string | null = null;
+  if (h.endsWith(".localhost")) {
+    label = h.slice(0, -".localhost".length);
+  } else if (h.endsWith(`.${BASE_DOMAIN}`)) {
+    label = h.slice(0, -`.${BASE_DOMAIN}`.length);
+  }
+  if (!label) return null;
+  const first = label.split(".")[0];
+  if (!first || first === "www" || first === "app") return null;
+  return first;
+}
+
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isProtected = pathname.startsWith(PROTECTED_PREFIX);
-  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.delete("x-agency-subdomain");
+  const subdomain = extractSubdomain(request.headers.get("host") ?? "");
+  if (subdomain) requestHeaders.set("x-agency-subdomain", subdomain);
 
-  if (isProtected && !sessionCookie) {
+  const sessionCookie = getSessionCookie(request);
+
+  if (pathname.startsWith("/dashboard") && !sessionCookie) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthRoute && sessionCookie) {
+  if (AUTH_ROUTES.some((route) => pathname.startsWith(route)) && sessionCookie) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  return NextResponse.next();
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
+  // Run on everything except API routes and static assets.
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

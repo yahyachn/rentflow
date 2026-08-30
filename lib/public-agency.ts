@@ -1,20 +1,19 @@
+import { headers } from "next/headers";
 import { cache } from "react";
 
 import { prisma } from "@/lib/prisma";
 
 /**
- * Resolves which agency the public marketing site is currently rendering
- * for. In production this reads the subdomain (`agencyA.rentflow.ma` ->
- * slug "agencyA") via the request host — that routing layer is real-domain
- * dependent and is intentionally deferred; for local dev and this Phase 1
- * deliverable it falls back to a single configurable demo agency so the
- * marketing pages have real data to render against.
+ * Resolve which agency the public marketing site is rendering for.
  *
- * TODO(Phase 2+): read `host` from `headers()` in middleware, extract the
- * subdomain, and pass the resolved agency down via a request header instead
- * of this constant lookup.
+ * The subdomain is resolved in middleware (`{agency}.rentflow.ma` /
+ * `{agency}.localhost`) and passed down as the `x-agency-subdomain` request
+ * header. When there's no subdomain (apex, bare localhost, a preview host) we
+ * fall back to a single configurable demo agency, so local dev and the demo
+ * deployment still have data to render. Cached per request.
  */
 export const getMarketingAgency = cache(async () => {
-  const slug = process.env.DEMO_AGENCY_SLUG ?? "atlas";
+  const subdomain = (await headers()).get("x-agency-subdomain");
+  const slug = subdomain ?? process.env.DEMO_AGENCY_SLUG ?? "atlas";
   return prisma.agency.findFirst({ where: { slug, deletedAt: null } });
 });
