@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 
 import { getCurrentUser } from "@/lib/tenant";
-import { listRoles, listTeam } from "@/services/team";
+import { listTeam } from "@/services/team";
+import { listRolesDetailed } from "@/services/roles";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgencyProfileForm, type AgencyProfileValues } from "@/features/settings/agency-profile-form";
 import { TeamManager, type TeamMember } from "@/features/team/team-manager";
+import { RolesManager, type RoleDTO } from "@/features/roles/roles-manager";
 import { CURRENCY_OPTIONS } from "@/validators/settings";
 
 export const metadata: Metadata = { title: "Settings" };
@@ -35,8 +37,12 @@ export default async function SettingsPage() {
 
   let members: TeamMember[] = [];
   let roles: { id: string; name: string }[] = [];
+  let roleDTOs: RoleDTO[] = [];
   if (canManageTeam) {
-    const [teamRows, roleRows] = await Promise.all([listTeam(agency.id), listRoles(agency.id)]);
+    const [teamRows, roleRows] = await Promise.all([
+      listTeam(agency.id),
+      listRolesDetailed(agency.id),
+    ]);
     members = teamRows.map((m) => ({
       id: m.id,
       name: m.name,
@@ -46,7 +52,14 @@ export default async function SettingsPage() {
       roleId: m.role?.id ?? null,
       createdAt: m.createdAt.toISOString(),
     }));
-    roles = roleRows;
+    roles = roleRows.map((r) => ({ id: r.id, name: r.name }));
+    roleDTOs = roleRows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      isSystem: r.isSystem,
+      permissionKeys: r.permissions.map((rp) => rp.permission.key),
+      memberCount: r._count.users,
+    }));
   }
 
   return (
@@ -115,6 +128,20 @@ export default async function SettingsPage() {
           </CardHeader>
           <CardContent>
             <TeamManager members={members} roles={roles} currentUserId={user.id} />
+          </CardContent>
+        </Card>
+      )}
+
+      {canManageTeam && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Roles &amp; permissions</CardTitle>
+            <CardDescription>
+              Built-in roles are locked. Create custom roles and choose exactly what each can do.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RolesManager roles={roleDTOs} />
           </CardContent>
         </Card>
       )}
