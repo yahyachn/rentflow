@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ImagePlus, Loader2, Star, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,6 +30,7 @@ export function ImageUploader({
   onChange: (images: VehicleImageDTO[]) => void;
   configured: boolean;
 }) {
+  const t = useTranslations("fleet");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(0);
 
@@ -38,17 +40,17 @@ export function ImageUploader({
 
     const room = MAX_IMAGES - value.length;
     if (room <= 0) {
-      toast.error(`You can attach up to ${MAX_IMAGES} images.`);
+      toast.error(t("iuMax", { max: MAX_IMAGES }));
       return;
     }
     const accepted: File[] = [];
     for (const file of files.slice(0, room)) {
       if (!ACCEPTED.includes(file.type)) {
-        toast.error(`${file.name}: unsupported file type.`);
+        toast.error(t("iuUnsupported", { name: file.name }));
         continue;
       }
       if (file.size > MAX_FILE_MB * 1024 * 1024) {
-        toast.error(`${file.name}: larger than ${MAX_FILE_MB} MB.`);
+        toast.error(t("iuTooLarge", { name: file.name, mb: MAX_FILE_MB }));
         continue;
       }
       accepted.push(file);
@@ -83,10 +85,10 @@ export function ImageUploader({
         if (res.ok && json.secure_url) {
           uploaded.push({ url: json.secure_url, publicId: json.public_id ?? null, isCover: false });
         } else {
-          toast.error(json.error?.message ?? `Upload failed for ${file.name}.`);
+          toast.error(json.error?.message ?? t("iuFailed", { name: file.name }));
         }
       } catch {
-        toast.error(`Upload failed for ${file.name}.`);
+        toast.error(t("iuFailed", { name: file.name }));
       } finally {
         setUploading((n) => Math.max(0, n - 1));
       }
@@ -109,7 +111,7 @@ export function ImageUploader({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium">Images</p>
+        <p className="text-sm font-medium">{t("iuImages")}</p>
         <span className="text-muted-foreground text-xs">
           {value.length}/{MAX_IMAGES}
         </span>
@@ -117,10 +119,7 @@ export function ImageUploader({
 
       {!configured && (
         <p className="bg-muted/50 text-muted-foreground rounded-md border border-dashed px-3 py-2 text-xs">
-          Image uploads need Cloudinary configured. Add <code>CLOUDINARY_CLOUD_NAME</code>,{" "}
-          <code>CLOUDINARY_API_KEY</code>, and <code>CLOUDINARY_API_SECRET</code> to{" "}
-          <code>.env</code> (see the README), then restart the dev server. Existing images are
-          still editable below.
+          {t("iuNeedCloudinary")}
         </p>
       )}
 
@@ -138,8 +137,8 @@ export function ImageUploader({
               <img src={img.url} alt="" className="size-full object-cover" />
 
               {img.isCover && (
-                <span className="bg-primary text-primary-foreground absolute top-1 left-1 rounded px-1 text-[10px] font-medium">
-                  Cover
+                <span className="bg-primary text-primary-foreground absolute top-1 start-1 rounded px-1 text-[10px] font-medium">
+                  {t("iuCover")}
                 </span>
               )}
 
@@ -151,8 +150,8 @@ export function ImageUploader({
                     size="icon"
                     className="size-7"
                     onClick={() => setCover(i)}
-                    aria-label="Set as cover"
-                    title="Set as cover"
+                    aria-label={t("iuSetCover")}
+                    title={t("iuSetCover")}
                   >
                     <Star className="size-3.5" />
                   </Button>
@@ -163,8 +162,8 @@ export function ImageUploader({
                   size="icon"
                   className="size-7"
                   onClick={() => remove(i)}
-                  aria-label="Remove image"
-                  title="Remove image"
+                  aria-label={t("iuRemove")}
+                  title={t("iuRemove")}
                 >
                   <X className="size-3.5" />
                 </Button>
@@ -193,22 +192,20 @@ export function ImageUploader({
       >
         {busy ? (
           <>
-            <Loader2 className="animate-spin" /> Uploading…
+            <Loader2 className="animate-spin" /> {t("iuUploading")}
           </>
         ) : value.length > 0 ? (
           <>
-            <Upload /> Add more images
+            <Upload /> {t("iuAddMore")}
           </>
         ) : (
           <>
-            <ImagePlus /> Upload images
+            <ImagePlus /> {t("iuUpload")}
           </>
         )}
       </Button>
       {value.length > 0 && (
-        <p className="text-muted-foreground text-xs">
-          Hover an image to set it as the cover or remove it.
-        </p>
+        <p className="text-muted-foreground text-xs">{t("iuHint")}</p>
       )}
     </div>
   );

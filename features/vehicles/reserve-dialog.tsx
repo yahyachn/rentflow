@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { CalendarClock, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,35 +27,6 @@ import type { ReservationInput } from "@/validators/reservation";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/**
- * Public reservation request. Collects the fields from the spec, validates
- * client-side, then creates a real PENDING booking via
- * `createPublicReservationAction` (server-side pricing + double-booking
- * prevention). The agency confirms it from the dashboard afterwards.
- */
-const formSchema = z
-  .object({
-    firstName: z.string().min(1, "Required"),
-    lastName: z.string().min(1, "Required"),
-    phone: z.string().min(1, "Required"),
-    whatsapp: z.string().optional(),
-    email: z.string().email("Enter a valid email"),
-    pickupDate: z.string().min(1, "Required"),
-    returnDate: z.string().min(1, "Required"),
-    pickupCity: z.string().min(1, "Required"),
-    returnCity: z.string().optional(),
-    flightNumber: z.string().optional(),
-    age: z.string().optional(),
-    licenseCountry: z.string().optional(),
-    message: z.string().optional(),
-  })
-  .refine((d) => new Date(d.returnDate) > new Date(d.pickupDate), {
-    message: "Return date must be after pickup date",
-    path: ["returnDate"],
-  });
-
-type ReservationForm = z.infer<typeof formSchema>;
-
 export function ReserveDialog({
   vehicleId,
   vehicleName,
@@ -64,8 +36,36 @@ export function ReserveDialog({
   vehicleName: string;
   dailyPrice: number | null;
 }) {
+  const t = useTranslations("reserve");
   const [open, setOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<string | null>(null);
+
+  const formSchema = useMemo(
+    () =>
+      z
+        .object({
+          firstName: z.string().min(1, t("vRequired")),
+          lastName: z.string().min(1, t("vRequired")),
+          phone: z.string().min(1, t("vRequired")),
+          whatsapp: z.string().optional(),
+          email: z.string().email(t("vEmail")),
+          pickupDate: z.string().min(1, t("vRequired")),
+          returnDate: z.string().min(1, t("vRequired")),
+          pickupCity: z.string().min(1, t("vRequired")),
+          returnCity: z.string().optional(),
+          flightNumber: z.string().optional(),
+          age: z.string().optional(),
+          licenseCountry: z.string().optional(),
+          message: z.string().optional(),
+        })
+        .refine((d) => new Date(d.returnDate) > new Date(d.pickupDate), {
+          message: t("vReturnAfter"),
+          path: ["returnDate"],
+        }),
+    [t],
+  );
+
+  type ReservationForm = z.infer<typeof formSchema>;
 
   const {
     register,
@@ -91,7 +91,6 @@ export function ReserveDialog({
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (!next) {
-      // Reset on close so the next open starts fresh.
       setTimeout(() => {
         reset();
         setConfirmation(null);
@@ -134,47 +133,48 @@ export function ReserveDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="lg" className="w-full sm:w-auto">
-          <CalendarClock /> Reserve this vehicle
+        <Button
+          size="lg"
+          className="sheen glow-primary w-full rounded-xl bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground hover:opacity-95"
+        >
+          <CalendarClock /> {t("cta")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="dark marketing-shell max-h-[85vh] overflow-y-auto border-white/10 sm:max-w-lg">
         {confirmation ? (
           <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <span className="bg-success/15 text-success flex size-12 items-center justify-center rounded-full">
+            <span className="flex size-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
               <CheckCircle2 className="size-6" />
             </span>
             <DialogHeader className="items-center">
-              <DialogTitle>Reservation request received</DialogTitle>
+              <DialogTitle>{t("successTitle")}</DialogTitle>
               <DialogDescription>
-                Your reference is <span className="text-foreground font-semibold">{confirmation}</span>
-                . We&apos;ve held the {vehicleName} for your dates and will confirm shortly. No charge
-                until it&apos;s confirmed.
+                {t("successRef")}{" "}
+                <span className="text-foreground font-semibold">{confirmation}</span>. {" "}
+                {t("successDesc", { name: vehicleName })}
               </DialogDescription>
             </DialogHeader>
             <Button onClick={() => handleOpenChange(false)} className="mt-2">
-              Done
+              {t("done")}
             </Button>
           </div>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Reserve the {vehicleName}</DialogTitle>
-              <DialogDescription>
-                Fill in your details and we&apos;ll confirm your reservation shortly.
-              </DialogDescription>
+              <DialogTitle>{t("title", { name: vehicleName })}</DialogTitle>
+              <DialogDescription>{t("desc")}</DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
               <div className="grid gap-1.5">
-                <Label htmlFor="firstName">First name</Label>
+                <Label htmlFor="firstName">{t("firstName")}</Label>
                 <Input id="firstName" {...register("firstName")} />
                 {errors.firstName && (
                   <p className="text-destructive text-xs">{errors.firstName.message}</p>
                 )}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="lastName">Last name</Label>
+                <Label htmlFor="lastName">{t("lastName")}</Label>
                 <Input id="lastName" {...register("lastName")} />
                 {errors.lastName && (
                   <p className="text-destructive text-xs">{errors.lastName.message}</p>
@@ -182,30 +182,30 @@ export function ReserveDialog({
               </div>
 
               <div className="grid gap-1.5">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t("phone")}</Label>
                 <Input id="phone" {...register("phone")} />
                 {errors.phone && <p className="text-destructive text-xs">{errors.phone.message}</p>}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="whatsapp">WhatsApp (optional)</Label>
+                <Label htmlFor="whatsapp">{t("whatsapp")}</Label>
                 <Input id="whatsapp" {...register("whatsapp")} />
               </div>
 
               <div className="col-span-2 grid gap-1.5">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("email")}</Label>
                 <Input id="email" type="email" {...register("email")} />
                 {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
               </div>
 
               <div className="grid gap-1.5">
-                <Label htmlFor="pickupDate">Pickup date</Label>
+                <Label htmlFor="pickupDate">{t("pickupDate")}</Label>
                 <Input id="pickupDate" type="date" {...register("pickupDate")} />
                 {errors.pickupDate && (
                   <p className="text-destructive text-xs">{errors.pickupDate.message}</p>
                 )}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="returnDate">Return date</Label>
+                <Label htmlFor="returnDate">{t("returnDate")}</Label>
                 <Input id="returnDate" type="date" {...register("returnDate")} />
                 {errors.returnDate && (
                   <p className="text-destructive text-xs">{errors.returnDate.message}</p>
@@ -213,40 +213,40 @@ export function ReserveDialog({
               </div>
 
               <div className="grid gap-1.5">
-                <Label htmlFor="pickupCity">Pickup city</Label>
+                <Label htmlFor="pickupCity">{t("pickupCity")}</Label>
                 <Input id="pickupCity" {...register("pickupCity")} />
                 {errors.pickupCity && (
                   <p className="text-destructive text-xs">{errors.pickupCity.message}</p>
                 )}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="returnCity">Return city (optional)</Label>
+                <Label htmlFor="returnCity">{t("returnCity")}</Label>
                 <Input id="returnCity" {...register("returnCity")} />
               </div>
 
               <div className="grid gap-1.5">
-                <Label htmlFor="flightNumber">Flight number (optional)</Label>
+                <Label htmlFor="flightNumber">{t("flightNumber")}</Label>
                 <Input id="flightNumber" {...register("flightNumber")} />
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="age">Driver age (optional)</Label>
+                <Label htmlFor="age">{t("age")}</Label>
                 <Input id="age" type="number" {...register("age")} />
               </div>
 
               <div className="col-span-2 grid gap-1.5">
-                <Label htmlFor="licenseCountry">License country (optional)</Label>
+                <Label htmlFor="licenseCountry">{t("licenseCountry")}</Label>
                 <Input id="licenseCountry" {...register("licenseCountry")} />
               </div>
 
               <div className="col-span-2 grid gap-1.5">
-                <Label htmlFor="message">Message (optional)</Label>
+                <Label htmlFor="message">{t("message")}</Label>
                 <Textarea id="message" rows={3} {...register("message")} />
               </div>
 
               {quote && (
-                <div className="bg-muted/50 col-span-2 flex items-center justify-between rounded-md border px-4 py-3 text-sm">
+                <div className="glass col-span-2 flex items-center justify-between rounded-xl px-4 py-3 text-sm">
                   <span className="text-muted-foreground">
-                    {quote.days} {quote.days === 1 ? "day" : "days"} × {formatCurrency(dailyPrice ?? 0)}
+                    {t("days", { count: quote.days })} × {formatCurrency(dailyPrice ?? 0)}
                   </span>
                   <span className="font-display text-lg font-semibold">
                     {formatCurrency(quote.total)}
@@ -255,8 +255,12 @@ export function ReserveDialog({
               )}
 
               <DialogFooter className="col-span-2">
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                  {isSubmitting ? "Sending…" : "Submit reservation request"}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="sheen w-full rounded-xl bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground"
+                >
+                  {isSubmitting ? t("sending") : t("submit")}
                 </Button>
               </DialogFooter>
             </form>

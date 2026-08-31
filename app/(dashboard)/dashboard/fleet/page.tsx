@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Car, Lock, Wrench } from "lucide-react";
 
 import { isCloudinaryConfigured } from "@/lib/cloudinary";
@@ -70,16 +71,13 @@ export default async function FleetPage() {
   const permissionKeys = user.role?.permissions.map((rp) => rp.permission.key) ?? [];
   const canView = user.role == null || permissionKeys.includes("fleet.view");
   const canManage = user.role == null || permissionKeys.includes("fleet.manage");
+  const t = await getTranslations("fleet");
 
   if (!canView) {
     return (
       <div className="space-y-6">
-        <FleetHeader />
-        <EmptyState
-          icon={Lock}
-          title="You don't have access to the fleet"
-          description="Ask an owner or manager to grant you the “View fleet” permission."
-        />
+        <FleetHeader title={t("title")} subtitle={t("subtitle")} />
+        <EmptyState icon={Lock} title={t("noAccessTitle")} description={t("noAccessDesc")} />
       </div>
     );
   }
@@ -121,14 +119,14 @@ export default async function FleetPage() {
 
   return (
     <div className="space-y-6">
-      <FleetHeader />
+      <FleetHeader title={t("title")} subtitle={t("subtitle")} />
       <Tabs defaultValue="vehicles" className="gap-4">
         <TabsList>
           <TabsTrigger value="vehicles">
-            <Car /> Vehicles
+            <Car /> {t("tabVehicles")}
           </TabsTrigger>
           <TabsTrigger value="maintenance">
-            <Wrench /> Maintenance
+            <Wrench /> {t("tabMaintenance")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="vehicles">
@@ -147,13 +145,11 @@ export default async function FleetPage() {
   );
 }
 
-function FleetHeader() {
+function FleetHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold">Fleet</h1>
-      <p className="text-muted-foreground text-sm">
-        Manage your cars and motorcycles, categories, and pricing.
-      </p>
+      <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
+      <p className="text-muted-foreground text-sm">{subtitle}</p>
     </div>
   );
 }

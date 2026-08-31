@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { getMarketingAgency } from "@/lib/public-agency";
 import {
@@ -19,10 +20,11 @@ export default async function HomePage() {
   const agency = await getMarketingAgency();
   if (!agency) notFound();
 
-  const [featured, latest, categories] = await Promise.all([
+  const [featured, latest, categories, t] = await Promise.all([
     getFeaturedVehicles(agency.id),
     getLatestVehicles(agency.id),
     getVehicleCategories(agency.id),
+    getTranslations("grid"),
   ]);
 
   const vehicleCount = categories.reduce((sum, c) => sum + c._count.vehicles, 0);
@@ -31,8 +33,8 @@ export default async function HomePage() {
     <>
       <Hero />
       <VehicleGridSection
-        title="Featured vehicles"
-        description="Hand-picked from our fleet."
+        title={t("featuredTitle")}
+        description={t("featuredDesc")}
         vehicles={featured}
         viewAllHref="/vehicles"
       />
@@ -41,8 +43,8 @@ export default async function HomePage() {
       <StatsSection vehicleCount={vehicleCount} categoryCount={categories.length} />
       <HowItWorks />
       <VehicleGridSection
-        title="Latest additions"
-        description="Recently added to the fleet."
+        title={t("latestTitle")}
+        description={t("latestDesc")}
         vehicles={latest}
         viewAllHref="/vehicles"
       />

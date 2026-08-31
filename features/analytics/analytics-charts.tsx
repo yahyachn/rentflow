@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Area,
   AreaChart,
@@ -39,6 +40,7 @@ const tooltipProps = {
 const tickStyle = { fontSize: 11, fill: "currentColor" } as const;
 
 export function RevenueTrendChart({ data }: { data: AgencyAnalytics["revenueByMonth"] }) {
+  const t = useTranslations("ana");
   return (
     <div className="text-muted-foreground h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -60,7 +62,7 @@ export function RevenueTrendChart({ data }: { data: AgencyAnalytics["revenueByMo
           />
           <Tooltip
             {...tooltipProps}
-            formatter={(value) => [formatCurrency(Number(value)), "Revenue"]}
+            formatter={(value) => [formatCurrency(Number(value)), t("tRevenue")]}
             cursor={{ stroke: "currentColor", strokeOpacity: 0.2 }}
           />
           <Area
@@ -87,6 +89,7 @@ function HBarChart({
   data: { label: string; value: number }[];
   currency?: boolean;
 }) {
+  const t = useTranslations("ana");
   return (
     <div className="text-muted-foreground h-64 w-full [&_.recharts-label-list_text]:fill-foreground">
       <ResponsiveContainer width="100%" height="100%">
@@ -117,7 +120,7 @@ function HBarChart({
             cursor={{ fill: "currentColor", fillOpacity: 0.06 }}
             formatter={(value) => [
               currency ? formatCurrency(Number(value)) : String(value),
-              currency ? "Revenue" : "Bookings",
+              currency ? t("tRevenue") : t("tBookings"),
             ]}
           />
           <Bar dataKey="value" fill={HUE} radius={[0, 4, 4, 0]} barSize={18}>
@@ -143,6 +146,7 @@ export function TopVehiclesChart({ data }: { data: AgencyAnalytics["topVehicles"
 }
 
 export function StatusBarChart({ data }: { data: AgencyAnalytics["byStatus"] }) {
+  const t = useTranslations("ana");
   return (
     <div className="text-muted-foreground h-64 w-full [&_.recharts-label-list_text]:fill-foreground">
       <ResponsiveContainer width="100%" height="100%">
@@ -159,7 +163,7 @@ export function StatusBarChart({ data }: { data: AgencyAnalytics["byStatus"] }) 
           <Tooltip
             {...tooltipProps}
             cursor={{ fill: "currentColor", fillOpacity: 0.06 }}
-            formatter={(value) => [String(value), "Bookings"]}
+            formatter={(value) => [String(value), t("tBookings")]}
           />
           <Bar dataKey="count" fill={HUE} radius={[4, 4, 0, 0]} maxBarSize={56}>
             <LabelList dataKey="count" position="top" style={{ fontSize: 11, fontWeight: 500 }} />

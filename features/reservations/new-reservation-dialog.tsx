@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { createReservationAction } from "@/actions/reservations";
@@ -28,6 +29,14 @@ import { BOOKING_SOURCE_OPTIONS, reservationSchema } from "@/validators/reservat
 import type { CustomerOption, VehicleOption } from "./types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Booking sources with a localized label (brand names keep their own name). */
+const SOURCE_KEY: Record<string, string> = {
+  WEBSITE: "nrSrcWEBSITE",
+  PHONE: "nrSrcPHONE",
+  WALK_IN: "nrSrcWALK_IN",
+  OTHER: "nrSrcOTHER",
+};
 
 const emptyForm = {
   vehicleId: "",
@@ -61,6 +70,7 @@ export function NewReservationDialog({
   vehicles: VehicleOption[];
   customers: CustomerOption[];
 }) {
+  const t = useTranslations("res");
   const [form, setForm] = useState<FormState>(emptyForm);
   const [customerMode, setCustomerMode] = useState<"existing" | "new">(
     customers.length > 0 ? "existing" : "new",
@@ -137,7 +147,7 @@ export function NewReservationDialog({
     startTransition(async () => {
       const result = await createReservationAction(parsed.data);
       if (result.ok) {
-        toast.success("Reservation created");
+        toast.success(t("nrCreated"));
         handleOpenChange(false);
       } else {
         if (result.fieldErrors) setErrors(result.fieldErrors);
@@ -153,26 +163,25 @@ export function NewReservationDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>New reservation</DialogTitle>
-          <DialogDescription>
-            Book a vehicle for a customer. The total is calculated from the vehicle&apos;s daily
-            rate, and overlapping dates are blocked automatically.
-          </DialogDescription>
+          <DialogTitle>{t("nrTitle")}</DialogTitle>
+          <DialogDescription>{t("nrDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Vehicle */}
           <div className="grid gap-1.5">
-            <Label>Vehicle</Label>
+            <Label>{t("nrVehicle")}</Label>
             <Select value={form.vehicleId} onValueChange={(v) => set("vehicleId", v)}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a vehicle" />
+                <SelectValue placeholder={t("nrSelectVehicle")} />
               </SelectTrigger>
               <SelectContent>
                 {vehicles.map((v) => (
                   <SelectItem key={v.id} value={v.id}>
                     {v.label}
-                    {v.dailyPrice != null ? ` — ${formatCurrency(v.dailyPrice)}/day` : " — no price"}
+                    {v.dailyPrice != null
+                      ? ` — ${formatCurrency(v.dailyPrice)}${t("nrPerDay")}`
+                      : ` — ${t("nrNoPrice")}`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -183,7 +192,7 @@ export function NewReservationDialog({
           {/* Customer */}
           <div className="grid gap-1.5">
             <div className="flex items-center justify-between">
-              <Label>Customer</Label>
+              <Label>{t("nrCustomer")}</Label>
               <div className="flex gap-1">
                 <Button
                   type="button"
@@ -192,7 +201,7 @@ export function NewReservationDialog({
                   onClick={() => setCustomerMode("existing")}
                   disabled={customers.length === 0}
                 >
-                  Existing
+                  {t("nrExisting")}
                 </Button>
                 <Button
                   type="button"
@@ -200,7 +209,7 @@ export function NewReservationDialog({
                   variant={customerMode === "new" ? "secondary" : "ghost"}
                   onClick={() => setCustomerMode("new")}
                 >
-                  New
+                  {t("nrNew")}
                 </Button>
               </div>
             </div>
@@ -209,7 +218,7 @@ export function NewReservationDialog({
               <>
                 <Select value={form.customerId} onValueChange={(v) => set("customerId", v)}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a customer" />
+                    <SelectValue placeholder={t("nrSelectCustomer")} />
                   </SelectTrigger>
                   <SelectContent>
                     {customers.map((c) => (
@@ -224,22 +233,22 @@ export function NewReservationDialog({
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  placeholder="First name"
+                  placeholder={t("nrFirstName")}
                   value={form.newFirstName}
                   onChange={(e) => set("newFirstName", e.target.value)}
                 />
                 <Input
-                  placeholder="Last name"
+                  placeholder={t("nrLastName")}
                   value={form.newLastName}
                   onChange={(e) => set("newLastName", e.target.value)}
                 />
                 <Input
-                  placeholder="Phone"
+                  placeholder={t("nrPhone")}
                   value={form.newPhone}
                   onChange={(e) => set("newPhone", e.target.value)}
                 />
                 <Input
-                  placeholder="Email (optional)"
+                  placeholder={t("nrEmailOpt")}
                   value={form.newEmail}
                   onChange={(e) => set("newEmail", e.target.value)}
                 />
@@ -250,7 +259,7 @@ export function NewReservationDialog({
           {/* Dates */}
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
-              <Label htmlFor="pickupDate">Pickup date</Label>
+              <Label htmlFor="pickupDate">{t("nrPickupDate")}</Label>
               <Input
                 id="pickupDate"
                 type="date"
@@ -260,7 +269,7 @@ export function NewReservationDialog({
               {err("pickupDate")}
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="returnDate">Return date</Label>
+              <Label htmlFor="returnDate">{t("nrReturnDate")}</Label>
               <Input
                 id="returnDate"
                 type="date"
@@ -270,7 +279,7 @@ export function NewReservationDialog({
               {err("returnDate")}
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="pickupTime">Pickup time</Label>
+              <Label htmlFor="pickupTime">{t("nrPickupTime")}</Label>
               <Input
                 id="pickupTime"
                 type="time"
@@ -279,7 +288,7 @@ export function NewReservationDialog({
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="returnTime">Return time</Label>
+              <Label htmlFor="returnTime">{t("nrReturnTime")}</Label>
               <Input
                 id="returnTime"
                 type="time"
@@ -292,7 +301,7 @@ export function NewReservationDialog({
           {/* Source + driver age */}
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
-              <Label>Booking source</Label>
+              <Label>{t("nrSource")}</Label>
               <Select value={form.source} onValueChange={(v) => set("source", v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -300,14 +309,14 @@ export function NewReservationDialog({
                 <SelectContent>
                   {BOOKING_SOURCE_OPTIONS.map((o) => (
                     <SelectItem key={o.value} value={o.value}>
-                      {o.label}
+                      {SOURCE_KEY[o.value] ? t(SOURCE_KEY[o.value]) : o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="driverAge">Driver age</Label>
+              <Label htmlFor="driverAge">{t("nrDriverAge")}</Label>
               <Input
                 id="driverAge"
                 type="number"
@@ -320,12 +329,12 @@ export function NewReservationDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
-              <Label htmlFor="couponCode">Coupon code (optional)</Label>
+              <Label htmlFor="couponCode">{t("nrCouponCode")}</Label>
               <Input
                 id="couponCode"
                 value={form.couponCode}
                 onChange={(e) => set("couponCode", e.target.value)}
-                placeholder="e.g. SUMMER20"
+                placeholder={t("nrCouponPlaceholder")}
                 className="uppercase"
               />
               {err("couponCode")}
@@ -333,7 +342,7 @@ export function NewReservationDialog({
           </div>
 
           <div className="grid gap-1.5">
-            <Label htmlFor="message">Note</Label>
+            <Label htmlFor="message">{t("nrNote")}</Label>
             <Textarea
               id="message"
               rows={2}
@@ -346,7 +355,7 @@ export function NewReservationDialog({
           {quote && (
             <div className="bg-muted/50 flex items-center justify-between rounded-md border px-4 py-3 text-sm">
               <span className="text-muted-foreground">
-                {quote.days} {quote.days === 1 ? "day" : "days"} ×{" "}
+                {t("days", { count: quote.days })} ×{" "}
                 {selectedVehicle?.dailyPrice != null
                   ? formatCurrency(selectedVehicle.dailyPrice)
                   : "—"}
@@ -365,10 +374,15 @@ export function NewReservationDialog({
             onClick={() => handleOpenChange(false)}
             disabled={pending}
           >
-            Cancel
+            {t("nrCancel")}
           </Button>
-          <Button type="button" onClick={submit} disabled={pending}>
-            {pending ? "Creating…" : "Create reservation"}
+          <Button
+            type="button"
+            onClick={submit}
+            disabled={pending}
+            className="bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground hover:opacity-95"
+          >
+            {pending ? t("nrCreating") : t("nrCreateBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

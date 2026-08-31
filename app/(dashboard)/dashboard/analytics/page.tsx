@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Banknote, CalendarClock, Lock, Percent, TrendingUp } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/tenant";
@@ -22,16 +23,13 @@ export default async function AnalyticsPage() {
 
   const permissionKeys = user.role?.permissions.map((rp) => rp.permission.key) ?? [];
   const canView = user.role == null || permissionKeys.includes("analytics.view");
+  const t = await getTranslations("ana");
 
   if (!canView) {
     return (
       <div className="space-y-6">
-        <Header />
-        <EmptyState
-          icon={Lock}
-          title="You don't have access to analytics"
-          description="Ask an owner or manager to grant you the “View analytics” permission."
-        />
+        <Header title={t("title")} subtitle={t("subtitle")} />
+        <EmptyState icon={Lock} title={t("noAccessTitle")} description={t("noAccessDesc")} />
       </div>
     );
   }
@@ -40,64 +38,54 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <Header />
+      <Header title={t("title")} subtitle={t("subtitle")} />
 
       {data.kpis.totalBookings === 0 ? (
-        <EmptyState
-          icon={TrendingUp}
-          title="No data to analyze yet"
-          description="Once you have reservations, revenue trends, booking sources, and utilization will appear here."
-        />
+        <EmptyState icon={TrendingUp} title={t("emptyTitle")} description={t("emptyDesc")} />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
-              label="Booked revenue"
+              label={t("kpiRevenue")}
               value={formatCurrency(data.kpis.totalRevenue)}
               icon={Banknote}
               accent="accent"
             />
             <StatCard
-              label="Total bookings"
+              label={t("kpiBookings")}
               value={String(data.kpis.totalBookings)}
               icon={CalendarClock}
               accent="primary"
             />
             <StatCard
-              label="Avg booking value"
+              label={t("kpiAvg")}
               value={formatCurrency(data.kpis.avgBookingValue)}
               icon={TrendingUp}
               accent="primary"
             />
             <StatCard
-              label="Occupancy (next 30d)"
+              label={t("kpiOccupancy")}
               value={`${data.kpis.occupancyRate}%`}
               icon={Percent}
               accent="warning"
             />
           </div>
 
-          <ChartCard
-            title="Booked revenue by month"
-            description="Confirmed, ongoing, and completed bookings by rental month."
-          >
+          <ChartCard title={t("revenueTitle")} description={t("revenueDesc")}>
             <RevenueTrendChart data={data.revenueByMonth} />
           </ChartCard>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <ChartCard title="Bookings by source" description="Where your reservations come from.">
+            <ChartCard title={t("sourceTitle")} description={t("sourceDesc")}>
               <BookingSourceChart data={data.bySource} />
             </ChartCard>
-            <ChartCard title="Bookings by status" description="The reservation pipeline.">
+            <ChartCard title={t("statusTitle")} description={t("statusDesc")}>
               <StatusBarChart data={data.byStatus} />
             </ChartCard>
           </div>
 
           {data.topVehicles.length > 0 && (
-            <ChartCard
-              title="Top vehicles by revenue"
-              description="Your best earners across confirmed bookings."
-            >
+            <ChartCard title={t("topTitle")} description={t("topDesc")}>
               <TopVehiclesChart data={data.topVehicles} />
             </ChartCard>
           )}
@@ -107,13 +95,11 @@ export default async function AnalyticsPage() {
   );
 }
 
-function Header() {
+function Header({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold">Analytics</h1>
-      <p className="text-muted-foreground text-sm">
-        Revenue, booking sources, and fleet utilization at a glance.
-      </p>
+      <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
+      <p className="text-muted-foreground text-sm">{subtitle}</p>
     </div>
   );
 }

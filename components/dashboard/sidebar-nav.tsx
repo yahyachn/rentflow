@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { DASHBOARD_NAV_ITEMS } from "@/components/dashboard/nav-items";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ export function SidebarNav({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const t = useTranslations("dashNav");
   const hasAll = permissionKeys.length === 0;
 
   return (
@@ -31,14 +33,26 @@ export function SidebarNav({
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
               isActive
                 ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
             )}
           >
-            <Icon className="size-4 shrink-0" />
-            {item.label}
+            {/* active accent bar */}
+            <span
+              className={cn(
+                "absolute inset-y-1.5 start-0 w-1 rounded-full bg-gradient-to-b from-primary to-[var(--gold)] transition-opacity duration-200",
+                isActive ? "opacity-100" : "opacity-0",
+              )}
+            />
+            <Icon
+              className={cn(
+                "size-4 shrink-0 transition-colors",
+                isActive ? "text-primary" : "group-hover:text-sidebar-accent-foreground",
+              )}
+            />
+            {t(item.labelKey)}
           </Link>
         );
       })}

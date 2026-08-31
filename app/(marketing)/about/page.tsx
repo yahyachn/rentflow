@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { BadgeCheck, MapPin, Wrench } from "lucide-react";
 
 import { getMarketingAgency } from "@/lib/public-agency";
+import { Reveal } from "@/components/marketing/reveal";
 
 export const metadata: Metadata = {
   title: "About us",
@@ -13,36 +15,38 @@ export default async function AboutPage() {
   const agency = await getMarketingAgency();
   if (!agency) notFound();
 
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-16 lg:px-6">
-      <h1 className="font-display text-3xl font-semibold">About {agency.name}</h1>
-      <p className="text-muted-foreground mt-4 leading-relaxed">
-        {agency.description ??
-          `${agency.name} is a car and motorcycle rental agency based in ${agency.city ?? "Morocco"}, offering a well-maintained fleet with transparent pricing and straightforward booking.`}
-      </p>
+  const t = await getTranslations("about");
+  const city = agency.city ?? "Morocco";
 
-      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <div className="rounded-xl border p-6">
-          <BadgeCheck className="text-primary size-5" />
-          <h2 className="mt-3 font-medium">Verified fleet</h2>
-          <p className="text-muted-foreground mt-1.5 text-sm">
-            Every vehicle is inspected and insured before it&apos;s listed for rent.
-          </p>
-        </div>
-        <div className="rounded-xl border p-6">
-          <Wrench className="text-primary size-5" />
-          <h2 className="mt-3 font-medium">Regular maintenance</h2>
-          <p className="text-muted-foreground mt-1.5 text-sm">
-            Scheduled servicing keeps every car and motorcycle road-ready.
-          </p>
-        </div>
-        <div className="rounded-xl border p-6">
-          <MapPin className="text-primary size-5" />
-          <h2 className="mt-3 font-medium">Local expertise</h2>
-          <p className="text-muted-foreground mt-1.5 text-sm">
-            Based in {agency.city ?? "Morocco"}, with pickup and return options nearby.
-          </p>
-        </div>
+  const cards = [
+    { icon: BadgeCheck, title: t("verifiedTitle"), desc: t("verifiedDesc") },
+    { icon: Wrench, title: t("maintenanceTitle"), desc: t("maintenanceDesc") },
+    { icon: MapPin, title: t("localTitle"), desc: t("localDesc", { city }) },
+  ];
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-20 lg:px-6">
+      <Reveal>
+        <h1 className="font-display text-4xl font-semibold tracking-tight">
+          <span className="text-gradient">{t("title", { name: agency.name })}</span>
+        </h1>
+        <p className="text-muted-foreground mt-5 text-lg leading-relaxed">
+          {agency.description ?? t("introFallback", { name: agency.name, city })}
+        </p>
+      </Reveal>
+
+      <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-3">
+        {cards.map((c, i) => (
+          <Reveal key={c.title} delay={i * 0.08}>
+            <div className="glass group h-full rounded-2xl p-6 transition-transform duration-300 hover:-translate-y-1.5">
+              <span className="glow-primary text-primary-foreground flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[var(--gold)] transition-transform duration-300 group-hover:scale-110">
+                <c.icon className="size-5" />
+              </span>
+              <h2 className="font-display mt-5 font-semibold">{c.title}</h2>
+              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{c.desc}</p>
+            </div>
+          </Reveal>
+        ))}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   ArrowDown,
   ArrowUp,
@@ -57,26 +58,14 @@ import { VehicleFormDialog } from "./vehicle-form-dialog";
 
 const PAGE_SIZE = 8;
 
-const STATUS_META: Record<
+const STATUS_VARIANT: Record<
   VehicleStatusValue,
-  { label: string; variant: "success" | "warning" | "secondary" | "outline" }
+  "success" | "warning" | "secondary" | "outline"
 > = {
-  AVAILABLE: { label: "Available", variant: "success" },
-  BOOKED: { label: "Booked", variant: "warning" },
-  MAINTENANCE: { label: "Maintenance", variant: "secondary" },
-  HIDDEN: { label: "Hidden", variant: "outline" },
-};
-
-const TRANSMISSION_LABEL: Record<string, string> = {
-  AUTOMATIC: "Automatic",
-  MANUAL: "Manual",
-  SEMI_AUTOMATIC: "Semi-auto",
-};
-const FUEL_LABEL: Record<string, string> = {
-  PETROL: "Petrol",
-  DIESEL: "Diesel",
-  ELECTRIC: "Electric",
-  HYBRID: "Hybrid",
+  AVAILABLE: "success",
+  BOOKED: "warning",
+  MAINTENANCE: "secondary",
+  HIDDEN: "outline",
 };
 
 type SortKey = "vehicle" | "year" | "dailyPrice" | "status";
@@ -93,6 +82,8 @@ export function FleetView({
   canManage: boolean;
   cloudinaryConfigured: boolean;
 }) {
+  const t = useTranslations("fleet");
+  const tv = useTranslations("vehicleCard");
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"ALL" | "CAR" | "MOTORCYCLE">("ALL");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ACTIVE");
@@ -172,7 +163,7 @@ export function FleetView({
     const target = archiveTarget;
     startTransition(async () => {
       const result = await archiveVehicleAction(target.id);
-      if (result.ok) toast.success("Vehicle archived");
+      if (result.ok) toast.success(t("toastArchived"));
       else toast.error(result.error);
       setArchiveTarget(null);
     });
@@ -181,7 +172,7 @@ export function FleetView({
   function restore(vehicle: VehicleDTO) {
     startTransition(async () => {
       const result = await restoreVehicleAction(vehicle.id);
-      if (result.ok) toast.success("Vehicle restored");
+      if (result.ok) toast.success(t("toastRestored"));
       else toast.error(result.error);
     });
   }
@@ -193,15 +184,15 @@ export function FleetView({
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-56 flex-1">
-          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2" />
           <Input
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               setPage(0);
             }}
-            placeholder="Search brand, model, plate…"
-            className="pl-9"
+            placeholder={t("searchPlaceholder")}
+            className="ps-9"
           />
         </div>
 
@@ -216,9 +207,9 @@ export function FleetView({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All types</SelectItem>
-            <SelectItem value="CAR">Cars</SelectItem>
-            <SelectItem value="MOTORCYCLE">Motorcycles</SelectItem>
+            <SelectItem value="ALL">{t("allTypes")}</SelectItem>
+            <SelectItem value="CAR">{t("cars")}</SelectItem>
+            <SelectItem value="MOTORCYCLE">{t("motorcycles")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -233,12 +224,12 @@ export function FleetView({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ACTIVE">All active</SelectItem>
-            <SelectItem value="AVAILABLE">Available</SelectItem>
-            <SelectItem value="BOOKED">Booked</SelectItem>
-            <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-            <SelectItem value="HIDDEN">Hidden</SelectItem>
-            <SelectItem value="ARCHIVED">Archived</SelectItem>
+            <SelectItem value="ACTIVE">{t("allActive")}</SelectItem>
+            <SelectItem value="AVAILABLE">{t("sAVAILABLE")}</SelectItem>
+            <SelectItem value="BOOKED">{t("sBOOKED")}</SelectItem>
+            <SelectItem value="MAINTENANCE">{t("sMAINTENANCE")}</SelectItem>
+            <SelectItem value="HIDDEN">{t("sHIDDEN")}</SelectItem>
+            <SelectItem value="ARCHIVED">{t("archived")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -253,23 +244,26 @@ export function FleetView({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All categories</SelectItem>
+            <SelectItem value="ALL">{t("allCategories")}</SelectItem>
             {categories.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.name}
               </SelectItem>
             ))}
-            <SelectItem value="NONE">Uncategorized</SelectItem>
+            <SelectItem value="NONE">{t("uncategorized")}</SelectItem>
           </SelectContent>
         </Select>
 
         {canManage && (
           <>
             <Button variant="outline" onClick={() => setCategoryOpen(true)}>
-              <Tags /> Categories
+              <Tags /> {t("categories")}
             </Button>
-            <Button onClick={openCreate}>
-              <Plus /> Add vehicle
+            <Button
+              onClick={openCreate}
+              className="bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground hover:opacity-95"
+            >
+              <Plus /> {t("addVehicle")}
             </Button>
           </>
         )}
@@ -279,12 +273,12 @@ export function FleetView({
       {totalActive === 0 && statusFilter === "ACTIVE" && !query ? (
         <EmptyState
           icon={Car}
-          title="No vehicles yet"
-          description="Add your first car or motorcycle to start building your fleet."
+          title={t("emptyTitle")}
+          description={t("emptyDesc")}
           action={
             canManage ? (
               <Button onClick={openCreate}>
-                <Plus /> Add your first vehicle
+                <Plus /> {t("addFirst")}
               </Button>
             ) : undefined
           }
@@ -295,18 +289,18 @@ export function FleetView({
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <SortButton label="Vehicle" active={sortKey === "vehicle"} dir={sortDir} onClick={() => toggleSort("vehicle")} />
+                  <SortButton label={t("colVehicle")} active={sortKey === "vehicle"} dir={sortDir} onClick={() => toggleSort("vehicle")} />
                 </TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="hidden md:table-cell">Specs</TableHead>
+                <TableHead>{t("colCategory")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("colSpecs")}</TableHead>
                 <TableHead>
-                  <SortButton label="Year" active={sortKey === "year"} dir={sortDir} onClick={() => toggleSort("year")} />
-                </TableHead>
-                <TableHead>
-                  <SortButton label="Daily" active={sortKey === "dailyPrice"} dir={sortDir} onClick={() => toggleSort("dailyPrice")} />
+                  <SortButton label={t("colYear")} active={sortKey === "year"} dir={sortDir} onClick={() => toggleSort("year")} />
                 </TableHead>
                 <TableHead>
-                  <SortButton label="Status" active={sortKey === "status"} dir={sortDir} onClick={() => toggleSort("status")} />
+                  <SortButton label={t("colDaily")} active={sortKey === "dailyPrice"} dir={sortDir} onClick={() => toggleSort("dailyPrice")} />
+                </TableHead>
+                <TableHead>
+                  <SortButton label={t("colStatus")} active={sortKey === "status"} dir={sortDir} onClick={() => toggleSort("status")} />
                 </TableHead>
                 <TableHead className="w-10" />
               </TableRow>
@@ -315,7 +309,7 @@ export function FleetView({
               {pageRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-muted-foreground py-10 text-center">
-                    No vehicles match your filters.
+                    {t("noMatch")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -340,11 +334,11 @@ export function FleetView({
                             <span className="truncate font-medium">
                               {v.brand} {v.model}
                             </span>
-                            {v.featured && <Badge variant="secondary">Featured</Badge>}
-                            {v.archived && <Badge variant="outline">Archived</Badge>}
+                            {v.featured && <Badge variant="secondary">{t("featured")}</Badge>}
+                            {v.archived && <Badge variant="outline">{t("archived")}</Badge>}
                           </div>
                           <p className="text-muted-foreground truncate text-xs">
-                            {v.type === "CAR" ? "Car" : "Motorcycle"} · {v.slug}
+                            {v.type === "CAR" ? t("car") : t("motorcycle")} · {v.slug}
                           </p>
                         </div>
                       </div>
@@ -358,8 +352,8 @@ export function FleetView({
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <span className="text-muted-foreground text-xs">
-                        {TRANSMISSION_LABEL[v.transmission]} · {FUEL_LABEL[v.fuel]}
-                        {v.seats ? ` · ${v.seats} seats` : ""}
+                        {tv(`transmission.${v.transmission}`)} · {tv(`fuel.${v.fuel}`)}
+                        {v.seats ? ` · ${t("seats", { count: v.seats })}` : ""}
                       </span>
                     </TableCell>
                     <TableCell className="tabular-nums">{v.year}</TableCell>
@@ -371,9 +365,7 @@ export function FleetView({
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_META[v.status].variant}>
-                        {STATUS_META[v.status].label}
-                      </Badge>
+                      <Badge variant={STATUS_VARIANT[v.status]}>{t(`s${v.status}`)}</Badge>
                     </TableCell>
                     <TableCell>
                       {canManage && (
@@ -381,24 +373,24 @@ export function FleetView({
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="size-8">
                               <MoreHorizontal className="size-4" />
-                              <span className="sr-only">Actions</span>
+                              <span className="sr-only">{t("actions")}</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {v.archived ? (
                               <DropdownMenuItem onClick={() => restore(v)} disabled={pending}>
-                                <RotateCcw /> Restore
+                                <RotateCcw /> {t("restore")}
                               </DropdownMenuItem>
                             ) : (
                               <>
                                 <DropdownMenuItem onClick={() => openEdit(v)}>
-                                  <Pencil /> Edit
+                                  <Pencil /> {t("edit")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   variant="destructive"
                                   onClick={() => setArchiveTarget(v)}
                                 >
-                                  <Trash2 /> Archive
+                                  <Trash2 /> {t("archive")}
                                 </DropdownMenuItem>
                               </>
                             )}
@@ -418,8 +410,11 @@ export function FleetView({
       {filtered.length > 0 && (
         <div className="flex items-center justify-between text-sm">
           <p className="text-muted-foreground">
-            Showing {currentPage * PAGE_SIZE + 1}–
-            {Math.min(currentPage * PAGE_SIZE + PAGE_SIZE, filtered.length)} of {filtered.length}
+            {t("showing", {
+              from: currentPage * PAGE_SIZE + 1,
+              to: Math.min(currentPage * PAGE_SIZE + PAGE_SIZE, filtered.length),
+              total: filtered.length,
+            })}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -428,10 +423,10 @@ export function FleetView({
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={currentPage === 0}
             >
-              Previous
+              {t("previous")}
             </Button>
             <span className="text-muted-foreground">
-              Page {currentPage + 1} of {pageCount}
+              {t("page", { current: currentPage + 1, total: pageCount })}
             </span>
             <Button
               variant="outline"
@@ -439,7 +434,7 @@ export function FleetView({
               onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
               disabled={currentPage >= pageCount - 1}
             >
-              Next
+              {t("next")}
             </Button>
           </div>
         </div>
@@ -462,15 +457,10 @@ export function FleetView({
           <Dialog open={archiveTarget != null} onOpenChange={(o) => !o && setArchiveTarget(null)}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Archive this vehicle?</DialogTitle>
+                <DialogTitle>{t("archiveTitle")}</DialogTitle>
                 <DialogDescription>
-                  {archiveTarget && (
-                    <>
-                      &ldquo;{archiveTarget.brand} {archiveTarget.model}&rdquo; will be hidden from
-                      your website and lists. This is a soft delete — you can restore it anytime
-                      from the Archived filter.
-                    </>
-                  )}
+                  {archiveTarget &&
+                    t("archiveDesc", { name: `${archiveTarget.brand} ${archiveTarget.model}` })}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -479,10 +469,10 @@ export function FleetView({
                   onClick={() => setArchiveTarget(null)}
                   disabled={pending}
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button variant="destructive" onClick={confirmArchive} disabled={pending}>
-                  {pending ? "Archiving…" : "Archive"}
+                  {pending ? t("archiving") : t("archive")}
                 </Button>
               </DialogFooter>
             </DialogContent>

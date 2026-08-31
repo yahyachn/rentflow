@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { createVehicleAction, updateVehicleAction } from "@/actions/fleet";
@@ -114,6 +115,8 @@ export function VehicleFormDialog({
   categories: CategoryDTO[];
   cloudinaryConfigured: boolean;
 }) {
+  const t = useTranslations("fleet");
+  const tv = useTranslations("vehicleCard");
   const isEdit = vehicle != null;
   const [pending, startTransition] = useTransition();
   const [images, setImages] = useState<VehicleImageDTO[]>(vehicle?.images ?? []);
@@ -161,7 +164,7 @@ export function VehicleFormDialog({
         : await createVehicleAction(parsed.data);
 
       if (result.ok) {
-        toast.success(isEdit ? "Vehicle updated" : "Vehicle added");
+        toast.success(isEdit ? t("toastVehUpdated") : t("toastVehAdded"));
         onOpenChange(false);
       } else {
         if (result.fieldErrors) {
@@ -181,19 +184,15 @@ export function VehicleFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-2xl">
         <DialogHeader className="border-b px-6 py-4">
-          <DialogTitle>{isEdit ? "Edit vehicle" : "Add vehicle"}</DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? "Update this vehicle's details, pricing, and availability."
-              : "Add a car or motorcycle to your fleet."}
-          </DialogDescription>
+          <DialogTitle>{isEdit ? t("vfEditTitle") : t("vfAddTitle")}</DialogTitle>
+          <DialogDescription>{isEdit ? t("vfEditDesc") : t("vfAddDesc")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(submit)} className="space-y-6 px-6 py-5">
           {/* Identity */}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1.5">
-              <Label>Type</Label>
+              <Label>{t("vfType")}</Label>
               <Controller
                 control={control}
                 name="type"
@@ -212,7 +211,7 @@ export function VehicleFormDialog({
                     <SelectContent>
                       {VEHICLE_TYPE_OPTIONS.map((o) => (
                         <SelectItem key={o.value} value={o.value}>
-                          {o.label}
+                          {o.value === "CAR" ? t("car") : t("motorcycle")}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -221,17 +220,17 @@ export function VehicleFormDialog({
               />
             </div>
             <div className="grid gap-1.5">
-              <Label>Category</Label>
+              <Label>{t("vfCategory")}</Label>
               <Controller
                 control={control}
                 name="categoryId"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="No category" />
+                      <SelectValue placeholder={t("vfNoCategory")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={NO_CATEGORY}>No category</SelectItem>
+                      <SelectItem value={NO_CATEGORY}>{t("vfNoCategory")}</SelectItem>
                       {categoriesForType.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.name}
@@ -244,34 +243,34 @@ export function VehicleFormDialog({
             </div>
 
             <div className="grid gap-1.5">
-              <Label htmlFor="brand">Brand</Label>
-              <Input id="brand" {...register("brand")} placeholder="e.g. Dacia" />
+              <Label htmlFor="brand">{t("vfBrand")}</Label>
+              <Input id="brand" {...register("brand")} placeholder={t("vfBrandPh")} />
               {err("brand")}
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="model">Model</Label>
-              <Input id="model" {...register("model")} placeholder="e.g. Sandero" />
+              <Label htmlFor="model">{t("vfModel")}</Label>
+              <Input id="model" {...register("model")} placeholder={t("vfModelPh")} />
               {err("model")}
             </div>
 
             <div className="grid gap-1.5">
-              <Label htmlFor="year">Year</Label>
+              <Label htmlFor="year">{t("vfYear")}</Label>
               <Input id="year" type="number" {...register("year")} />
               {err("year")}
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="color">Color</Label>
-              <Input id="color" {...register("color")} placeholder="e.g. White" />
+              <Label htmlFor="color">{t("vfColor")}</Label>
+              <Input id="color" {...register("color")} placeholder={t("vfColorPh")} />
               {err("color")}
             </div>
           </div>
 
           {/* Specs */}
           <div>
-            <p className="mb-3 text-sm font-medium">Specifications</p>
+            <p className="mb-3 text-sm font-medium">{t("vfSpecs")}</p>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <div className="grid gap-1.5">
-                <Label>Transmission</Label>
+                <Label>{t("vfTransmission")}</Label>
                 <Controller
                   control={control}
                   name="transmission"
@@ -283,7 +282,7 @@ export function VehicleFormDialog({
                       <SelectContent>
                         {TRANSMISSION_OPTIONS.map((o) => (
                           <SelectItem key={o.value} value={o.value}>
-                            {o.label}
+                            {tv(`transmission.${o.value}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -292,7 +291,7 @@ export function VehicleFormDialog({
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label>Fuel</Label>
+                <Label>{t("vfFuel")}</Label>
                 <Controller
                   control={control}
                   name="fuel"
@@ -304,7 +303,7 @@ export function VehicleFormDialog({
                       <SelectContent>
                         {FUEL_OPTIONS.map((o) => (
                           <SelectItem key={o.value} value={o.value}>
-                            {o.label}
+                            {tv(`fuel.${o.value}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -313,34 +312,34 @@ export function VehicleFormDialog({
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="seats">Seats</Label>
+                <Label htmlFor="seats">{t("vfSeats")}</Label>
                 <Input id="seats" type="number" {...register("seats")} />
                 {err("seats")}
               </div>
               {type === "CAR" && (
                 <div className="grid gap-1.5">
-                  <Label htmlFor="doors">Doors</Label>
+                  <Label htmlFor="doors">{t("vfDoors")}</Label>
                   <Input id="doors" type="number" {...register("doors")} />
                   {err("doors")}
                 </div>
               )}
               <div className="grid gap-1.5">
-                <Label htmlFor="horsepower">Horsepower</Label>
+                <Label htmlFor="horsepower">{t("vfHorsepower")}</Label>
                 <Input id="horsepower" type="number" {...register("horsepower")} />
                 {err("horsepower")}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="engineSize">Engine size</Label>
-                <Input id="engineSize" {...register("engineSize")} placeholder="e.g. 1.5L" />
+                <Label htmlFor="engineSize">{t("vfEngine")}</Label>
+                <Input id="engineSize" {...register("engineSize")} placeholder={t("vfEnginePh")} />
                 {err("engineSize")}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="mileage">Mileage (km)</Label>
+                <Label htmlFor="mileage">{t("vfMileage")}</Label>
                 <Input id="mileage" type="number" {...register("mileage")} />
                 {err("mileage")}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="licensePlate">License plate</Label>
+                <Label htmlFor="licensePlate">{t("vfPlate")}</Label>
                 <Input id="licensePlate" {...register("licensePlate")} />
                 {err("licensePlate")}
               </div>
@@ -349,15 +348,15 @@ export function VehicleFormDialog({
 
           {/* Features */}
           <div>
-            <p className="mb-3 text-sm font-medium">Features</p>
+            <p className="mb-3 text-sm font-medium">{t("vfFeatures")}</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {(
                 [
-                  ["hasAC", "Air conditioning"],
-                  ["hasBluetooth", "Bluetooth"],
-                  ["hasGPS", "GPS"],
-                  ["unlimitedKm", "Unlimited km"],
-                  ["insuranceIncluded", "Insurance included"],
+                  ["hasAC", t("vfAC")],
+                  ["hasBluetooth", t("vfBluetooth")],
+                  ["hasGPS", t("vfGPS")],
+                  ["unlimitedKm", t("vfUnlimited")],
+                  ["insuranceIncluded", t("vfInsurance")],
                 ] as const
               ).map(([name, label]) => (
                 <label
@@ -379,25 +378,25 @@ export function VehicleFormDialog({
 
           {/* Pricing */}
           <div>
-            <p className="mb-3 text-sm font-medium">Pricing (MAD)</p>
+            <p className="mb-3 text-sm font-medium">{t("vfPricing")}</p>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div className="grid gap-1.5">
-                <Label htmlFor="dailyPrice">Daily</Label>
+                <Label htmlFor="dailyPrice">{t("vfDaily")}</Label>
                 <Input id="dailyPrice" type="number" step="0.01" {...register("dailyPrice")} />
                 {err("dailyPrice")}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="weeklyPrice">Weekly</Label>
+                <Label htmlFor="weeklyPrice">{t("vfWeekly")}</Label>
                 <Input id="weeklyPrice" type="number" step="0.01" {...register("weeklyPrice")} />
                 {err("weeklyPrice")}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="monthlyPrice">Monthly</Label>
+                <Label htmlFor="monthlyPrice">{t("vfMonthly")}</Label>
                 <Input id="monthlyPrice" type="number" step="0.01" {...register("monthlyPrice")} />
                 {err("monthlyPrice")}
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="depositAmount">Deposit</Label>
+                <Label htmlFor="depositAmount">{t("vfDeposit")}</Label>
                 <Input
                   id="depositAmount"
                   type="number"
@@ -415,7 +414,7 @@ export function VehicleFormDialog({
           {/* Status + visibility */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1.5">
-              <Label>Status</Label>
+              <Label>{t("vfStatus")}</Label>
               <Controller
                 control={control}
                 name="status"
@@ -427,7 +426,7 @@ export function VehicleFormDialog({
                     <SelectContent>
                       {VEHICLE_STATUS_OPTIONS.map((o) => (
                         <SelectItem key={o.value} value={o.value}>
-                          {o.label}
+                          {t(`s${o.value}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -436,9 +435,9 @@ export function VehicleFormDialog({
               />
             </div>
             <div className="grid gap-1.5">
-              <Label>Visibility</Label>
+              <Label>{t("vfVisibility")}</Label>
               <label className="flex h-9 items-center justify-between gap-2 rounded-md border px-3 text-sm">
-                <span>Featured on website</span>
+                <span>{t("vfFeatured")}</span>
                 <Controller
                   control={control}
                   name="featured"
@@ -451,7 +450,7 @@ export function VehicleFormDialog({
           </div>
 
           <div className="grid gap-1.5">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("vfDescription")}</Label>
             <Textarea id="description" rows={3} {...register("description")} />
             {err("description")}
           </div>
@@ -463,10 +462,14 @@ export function VehicleFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={pending}
             >
-              Cancel
+              {t("vfCancel")}
             </Button>
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving…" : isEdit ? "Save changes" : "Add vehicle"}
+            <Button
+              type="submit"
+              disabled={pending}
+              className="bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground hover:opacity-95"
+            >
+              {pending ? t("vfSaving") : isEdit ? t("vfSave") : t("vfAddBtn")}
             </Button>
           </DialogFooter>
         </form>
