@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -41,6 +42,7 @@ export function CategoryManagerDialog({
   onOpenChange: (open: boolean) => void;
   categories: CategoryDTO[];
 }) {
+  const t = useTranslations("fleet");
   const [pending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -61,7 +63,7 @@ export function CategoryManagerDialog({
   function save() {
     const parsed = categorySchema.safeParse(form);
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Please check the form.");
+      setError(parsed.error.issues[0]?.message ?? t("catFormError"));
       return;
     }
     startTransition(async () => {
@@ -69,7 +71,7 @@ export function CategoryManagerDialog({
         ? await updateCategoryAction(editingId, parsed.data)
         : await createCategoryAction(parsed.data);
       if (result.ok) {
-        toast.success(editingId ? "Category updated" : "Category added");
+        toast.success(editingId ? t("toastCatUpdated") : t("toastCatAdded"));
         resetForm();
       } else {
         toast.error(result.error);
@@ -81,7 +83,7 @@ export function CategoryManagerDialog({
     startTransition(async () => {
       const result = await deleteCategoryAction(category.id);
       if (result.ok) {
-        toast.success("Category deleted");
+        toast.success(t("toastCatDeleted"));
         if (editingId === category.id) resetForm();
       } else {
         toast.error(result.error);
@@ -93,18 +95,13 @@ export function CategoryManagerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Manage categories</DialogTitle>
-          <DialogDescription>
-            Group your fleet into categories (e.g. Economy, SUV, Scooter). Deleting a category
-            leaves its vehicles in place, just uncategorized.
-          </DialogDescription>
+          <DialogTitle>{t("catManageTitle")}</DialogTitle>
+          <DialogDescription>{t("catManageDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="max-h-64 space-y-1 overflow-y-auto">
           {categories.length === 0 ? (
-            <p className="text-muted-foreground py-6 text-center text-sm">
-              No categories yet — add your first one below.
-            </p>
+            <p className="text-muted-foreground py-6 text-center text-sm">{t("catEmpty")}</p>
           ) : (
             categories.map((c) => (
               <div
@@ -114,10 +111,10 @@ export function CategoryManagerDialog({
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="truncate font-medium">{c.name}</span>
                   <Badge variant="outline">
-                    {c.type === "CAR" ? "Car" : "Motorcycle"}
+                    {c.type === "CAR" ? t("car") : t("motorcycle")}
                   </Badge>
                   <span className="text-muted-foreground shrink-0 text-xs">
-                    {c.vehicleCount} {c.vehicleCount === 1 ? "vehicle" : "vehicles"}
+                    {t("catVehicles", { count: c.vehicleCount })}
                   </span>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
@@ -152,26 +149,26 @@ export function CategoryManagerDialog({
         <div className="space-y-3 rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">
-              {editingId ? "Edit category" : "Add category"}
+              {editingId ? t("catEditTitle") : t("catAddTitle")}
             </p>
             {editingId && (
               <Button type="button" variant="ghost" size="sm" onClick={resetForm}>
-                <X className="size-4" /> Cancel
+                <X className="size-4" /> {t("catCancel")}
               </Button>
             )}
           </div>
           <div className="grid grid-cols-[1fr_auto] gap-3">
             <div className="grid gap-1.5">
-              <Label htmlFor="cat-name">Name</Label>
+              <Label htmlFor="cat-name">{t("catName")}</Label>
               <Input
                 id="cat-name"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="e.g. Economy"
+                placeholder={t("catNamePlaceholder")}
               />
             </div>
             <div className="grid gap-1.5">
-              <Label>Type</Label>
+              <Label>{t("catType")}</Label>
               <Select
                 value={form.type}
                 onValueChange={(v) => setForm((f) => ({ ...f, type: v as VehicleTypeValue }))}
@@ -182,7 +179,7 @@ export function CategoryManagerDialog({
                 <SelectContent>
                   {VEHICLE_TYPE_OPTIONS.map((o) => (
                     <SelectItem key={o.value} value={o.value}>
-                      {o.label}
+                      {o.value === "CAR" ? t("car") : t("motorcycle")}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -193,11 +190,11 @@ export function CategoryManagerDialog({
           <Button type="button" onClick={save} disabled={pending} className="w-full">
             {editingId ? (
               <>
-                <Pencil /> Save category
+                <Pencil /> {t("catSaveBtn")}
               </>
             ) : (
               <>
-                <Plus /> Add category
+                <Plus /> {t("catAddBtn")}
               </>
             )}
           </Button>

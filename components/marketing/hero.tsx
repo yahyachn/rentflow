@@ -25,7 +25,6 @@ const fadeUp = {
 export function Hero() {
   const router = useRouter();
   const t = useTranslations("hero");
-  const tc = useTranslations("common");
   const [city, setCity] = useState("");
   const [type, setType] = useState<string>("");
 
