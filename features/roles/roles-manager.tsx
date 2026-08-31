@@ -21,6 +21,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PERMISSION_GROUPS, PERMISSIONS } from "@/lib/permissions";
 
+/** Maps a permission key / group to its id in the `set.perms` / `set.grp*` messages. */
+const PERM_ID: Record<string, string> = {
+  "fleet.view": "fleetView",
+  "fleet.manage": "fleetManage",
+  "reservations.view": "reservationsView",
+  "reservations.manage": "reservationsManage",
+  "reservations.approve": "reservationsApprove",
+  "customers.view": "customersView",
+  "customers.manage": "customersManage",
+  "analytics.view": "analyticsView",
+  "team.manage": "teamManage",
+  "billing.manage": "billingManage",
+  "settings.manage": "settingsManage",
+};
+
 export interface RoleDTO {
   id: string;
   name: string;
@@ -225,25 +240,32 @@ function RoleFormDialog({
               return (
                 <div key={group}>
                   <p className="text-muted-foreground mb-1.5 text-xs font-medium tracking-wide uppercase">
-                    {group}
+                    {t(`grp${group}`)}
                   </p>
                   <div className="space-y-1.5">
-                    {perms.map((p) => (
-                      <label
-                        key={p.key}
-                        className="hover:bg-muted/50 flex cursor-pointer items-start gap-2.5 rounded-md px-2 py-1.5"
-                      >
-                        <Checkbox
-                          checked={selected.has(p.key)}
-                          onCheckedChange={() => toggle(p.key)}
-                          className="mt-0.5"
-                        />
-                        <span className="text-sm">
-                          <span className="font-medium">{p.label}</span>
-                          <span className="text-muted-foreground block text-xs">{p.description}</span>
-                        </span>
-                      </label>
-                    ))}
+                    {perms.map((p) => {
+                      const id = PERM_ID[p.key];
+                      return (
+                        <label
+                          key={p.key}
+                          className="hover:bg-muted/50 flex cursor-pointer items-start gap-2.5 rounded-md px-2 py-1.5"
+                        >
+                          <Checkbox
+                            checked={selected.has(p.key)}
+                            onCheckedChange={() => toggle(p.key)}
+                            className="mt-0.5"
+                          />
+                          <span className="text-sm">
+                            <span className="font-medium">
+                              {id ? t(`perms.${id}.label`) : p.label}
+                            </span>
+                            <span className="text-muted-foreground block text-xs">
+                              {id ? t(`perms.${id}.desc`) : p.description}
+                            </span>
+                          </span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               );

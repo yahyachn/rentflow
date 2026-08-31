@@ -604,6 +604,26 @@
     "rlNameError": "Enter a role name (2+ characters).",
     "rlRoleUpdated": "Role updated",
     "rlRoleCreated": "Role created",
-    "rlCreateBtn": "Create role"
+    "rlCreateBtn": "Create role",
+    "grpFleet": "Fleet",
+    "grpReservations": "Reservations",
+    "grpCustomers": "Customers",
+    "grpAnalytics": "Analytics",
+    "grpTeam": "Team",
+    "grpBilling": "Billing",
+    "grpSettings": "Settings",
+    "perms": {
+      "fleetView": { "label": "View fleet", "desc": "See vehicles, categories, and pricing." },
+      "fleetManage": { "label": "Manage fleet", "desc": "Create, edit, and archive vehicles, pricing, and availability." },
+      "reservationsView": { "label": "View reservations", "desc": "See the booking calendar and reservation list." },
+      "reservationsManage": { "label": "Manage reservations", "desc": "Create, edit, and cancel reservations." },
+      "reservationsApprove": { "label": "Approve reservations", "desc": "Confirm pending requests and change status." },
+      "customersView": { "label": "View customers", "desc": "See the customer directory and profiles." },
+      "customersManage": { "label": "Manage customers", "desc": "Edit customer records, notes, and VIP/blacklist status." },
+      "analyticsView": { "label": "View analytics", "desc": "See revenue, occupancy, and performance dashboards." },
+      "teamManage": { "label": "Manage team", "desc": "Invite staff and assign roles." },
+      "billingManage": { "label": "Manage billing", "desc": "View invoices/payments and configure billing settings." },
+      "settingsManage": { "label": "Manage settings", "desc": "Edit agency profile, branding, and policies." }
+    }
   }
 }

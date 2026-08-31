@@ -604,6 +604,26 @@
     "rlNameError": "Saisissez un nom de rôle (2 caractères min).",
     "rlRoleUpdated": "Rôle mis à jour",
     "rlRoleCreated": "Rôle créé",
-    "rlCreateBtn": "Créer le rôle"
+    "rlCreateBtn": "Créer le rôle",
+    "grpFleet": "Flotte",
+    "grpReservations": "Réservations",
+    "grpCustomers": "Clients",
+    "grpAnalytics": "Analyses",
+    "grpTeam": "Équipe",
+    "grpBilling": "Facturation",
+    "grpSettings": "Paramètres",
+    "perms": {
+      "fleetView": { "label": "Voir la flotte", "desc": "Voir les véhicules, catégories et tarifs." },
+      "fleetManage": { "label": "Gérer la flotte", "desc": "Créer, modifier et archiver véhicules, tarifs et disponibilité." },
+      "reservationsView": { "label": "Voir les réservations", "desc": "Voir le calendrier et la liste des réservations." },
+      "reservationsManage": { "label": "Gérer les réservations", "desc": "Créer, modifier et annuler des réservations." },
+      "reservationsApprove": { "label": "Approuver les réservations", "desc": "Confirmer les demandes en attente et changer le statut." },
+      "customersView": { "label": "Voir les clients", "desc": "Voir le répertoire et les profils clients." },
+      "customersManage": { "label": "Gérer les clients", "desc": "Modifier les fiches, notes et statut VIP/liste noire." },
+      "analyticsView": { "label": "Voir les analyses", "desc": "Voir les tableaux de bord revenus, occupation et performance." },
+      "teamManage": { "label": "Gérer l'équipe", "desc": "Inviter du personnel et attribuer des rôles." },
+      "billingManage": { "label": "Gérer la facturation", "desc": "Voir factures/paiements et configurer la facturation." },
+      "settingsManage": { "label": "Gérer les paramètres", "desc": "Modifier le profil de l'agence, la marque et les politiques." }
+    }
   }
 }
