@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Lock } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/tenant";
@@ -16,16 +17,13 @@ export default async function CustomersPage() {
   const permissionKeys = user.role?.permissions.map((rp) => rp.permission.key) ?? [];
   const canView = user.role == null || permissionKeys.includes("customers.view");
   const canManage = user.role == null || permissionKeys.includes("customers.manage");
+  const t = await getTranslations("cust");
 
   if (!canView) {
     return (
       <div className="space-y-6">
-        <Header />
-        <EmptyState
-          icon={Lock}
-          title="You don't have access to customers"
-          description="Ask an owner or manager to grant you the “View customers” permission."
-        />
+        <Header title={t("title")} subtitle={t("subtitle")} />
+        <EmptyState icon={Lock} title={t("noAccessTitle")} description={t("noAccessDesc")} />
       </div>
     );
   }
@@ -50,19 +48,17 @@ export default async function CustomersPage() {
 
   return (
     <div className="space-y-6">
-      <Header />
+      <Header title={t("title")} subtitle={t("subtitle")} />
       <CustomersView customers={customers} canManage={canManage} />
     </div>
   );
 }
 
-function Header() {
+function Header({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold">Customers</h1>
-      <p className="text-muted-foreground text-sm">
-        Your customer directory, contact details, and booking history.
-      </p>
+      <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
+      <p className="text-muted-foreground text-sm">{subtitle}</p>
     </div>
   );
 }

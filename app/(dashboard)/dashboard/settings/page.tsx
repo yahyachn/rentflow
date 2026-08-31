@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { getCurrentUser } from "@/lib/tenant";
 import { listActivity } from "@/services/activity";
@@ -14,15 +15,16 @@ import { CURRENCY_OPTIONS } from "@/validators/settings";
 
 export const metadata: Metadata = { title: "Settings" };
 
-const ACTIVITY_LABEL: Record<string, string> = {
-  "reservation.created": "Created a reservation",
-  "reservation.status": "Changed reservation status",
-  "payment.recorded": "Recorded a payment",
-  "vehicle.created": "Added a vehicle",
-  "vehicle.archived": "Archived a vehicle",
-  "customer.created": "Added a customer",
-  "team.role": "Changed a member's role",
-  "team.status": "Changed a member's status",
+/** Maps an activity action to its key in the `set` message namespace. */
+const ACTIVITY_KEY: Record<string, string> = {
+  "reservation.created": "aReservationCreated",
+  "reservation.status": "aReservationStatus",
+  "payment.recorded": "aPaymentRecorded",
+  "vehicle.created": "aVehicleCreated",
+  "vehicle.archived": "aVehicleArchived",
+  "customer.created": "aCustomerCreated",
+  "team.role": "aTeamRole",
+  "team.status": "aTeamStatus",
 };
 
 export default async function SettingsPage() {
@@ -33,6 +35,7 @@ export default async function SettingsPage() {
   const permissionKeys = user.role?.permissions.map((rp) => rp.permission.key) ?? [];
   const canEditSettings = user.role == null || permissionKeys.includes("settings.manage");
   const canManageTeam = user.role == null || permissionKeys.includes("team.manage");
+  const t = await getTranslations("set");
 
   const profile: AgencyProfileValues = {
     name: agency.name,
@@ -82,11 +85,12 @@ export default async function SettingsPage() {
       meta && typeof meta === "object" && !Array.isArray(meta)
         ? ((meta as Record<string, unknown>).detail as string | undefined)
         : undefined;
+    const key = ACTIVITY_KEY[a.action];
     return {
       id: a.id,
-      label: ACTIVITY_LABEL[a.action] ?? a.action,
+      label: key ? t(key) : a.action,
       detail,
-      user: a.user?.name ?? "System",
+      user: a.user?.name ?? t("system"),
       createdAt: a.createdAt,
     };
   });
@@ -94,19 +98,15 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold">Settings</h1>
-        <p className="text-muted-foreground text-sm">
-          Your agency profile, team, and account.
-        </p>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Agency profile</CardTitle>
+          <CardTitle>{t("profileTitle")}</CardTitle>
           <CardDescription>
-            {canEditSettings
-              ? "This information appears on your invoices and public site."
-              : "You need the “Manage settings” permission to edit this."}
+            {canEditSettings ? t("profileDescEdit") : t("profileDescReadonly")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -116,12 +116,12 @@ export default async function SettingsPage() {
             <dl className="divide-y">
               {(
                 [
-                  ["Agency name", agency.name],
-                  ["Contact email", agency.email ?? "—"],
-                  ["Phone", agency.phone ?? "—"],
-                  ["City", agency.city ?? "—"],
-                  ["Currency", agency.currency],
-                  ["Timezone", agency.timezone],
+                  [t("roName"), agency.name],
+                  [t("roEmail"), agency.email ?? "—"],
+                  [t("roPhone"), agency.phone ?? "—"],
+                  [t("roCity"), agency.city ?? "—"],
+                  [t("roCurrency"), agency.currency],
+                  [t("roTimezone"), agency.timezone],
                 ] as [string, string][]
               ).map(([label, value]) => (
                 <div key={label} className="flex items-center justify-between py-3 text-sm">
@@ -134,13 +134,14 @@ export default async function SettingsPage() {
 
           <div className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 border-t pt-4 text-xs">
             <span>
-              Subdomain: <span className="text-foreground font-medium">{agency.slug}.rentflow.ma</span>
+              {t("subdomain")}:{" "}
+              <span className="text-foreground font-medium">{agency.slug}.rentflow.ma</span>
             </span>
             <span>
-              Plan: <span className="text-foreground font-medium">{agency.plan}</span>
+              {t("plan")}: <span className="text-foreground font-medium">{agency.plan}</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              Status: <Badge variant="success">{agency.status}</Badge>
+              {t("status")}: <Badge variant="success">{agency.status}</Badge>
             </span>
           </div>
         </CardContent>
@@ -149,11 +150,8 @@ export default async function SettingsPage() {
       {canManageTeam && (
         <Card>
           <CardHeader>
-            <CardTitle>Team</CardTitle>
-            <CardDescription>
-              Assign roles and manage access for your staff. Inviting new members by email arrives
-              with the messaging integration.
-            </CardDescription>
+            <CardTitle>{t("teamTitle")}</CardTitle>
+            <CardDescription>{t("teamDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <TeamManager members={members} roles={roles} currentUserId={user.id} />
@@ -164,10 +162,8 @@ export default async function SettingsPage() {
       {canManageTeam && (
         <Card>
           <CardHeader>
-            <CardTitle>Roles &amp; permissions</CardTitle>
-            <CardDescription>
-              Built-in roles are locked. Create custom roles and choose exactly what each can do.
-            </CardDescription>
+            <CardTitle>{t("rolesTitle")}</CardTitle>
+            <CardDescription>{t("rolesDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <RolesManager roles={roleDTOs} />
@@ -178,12 +174,12 @@ export default async function SettingsPage() {
       {canEditSettings && (
         <Card>
           <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
-            <CardDescription>An audit trail of recent changes across your agency.</CardDescription>
+            <CardTitle>{t("activityTitle")}</CardTitle>
+            <CardDescription>{t("activityDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {activity.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No activity recorded yet.</p>
+              <p className="text-muted-foreground text-sm">{t("activityEmpty")}</p>
             ) : (
               <ul className="divide-y">
                 {activity.map((a) => (
@@ -213,12 +209,15 @@ export default async function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Your account</CardTitle>
+          <CardTitle>{t("accountTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="text-muted-foreground text-sm">
-          Signed in as <span className="text-foreground font-medium">{user.name}</span> with the{" "}
-          <span className="text-foreground font-medium">{user.role?.name ?? "—"}</span> role (
-          {user.role?.permissions.length ?? 0} permissions).
+          {t.rich("accountBody", {
+            name: user.name,
+            role: user.role?.name ?? "—",
+            count: user.role?.permissions.length ?? 0,
+            b: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+          })}
         </CardContent>
       </Card>
     </div>

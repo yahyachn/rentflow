@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Lock, Pencil, Plus, Shield, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,6 +30,7 @@ export interface RoleDTO {
 }
 
 export function RolesManager({ roles }: { roles: RoleDTO[] }) {
+  const t = useTranslations("set");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<RoleDTO | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RoleDTO | null>(null);
@@ -44,7 +46,7 @@ export function RolesManager({ roles }: { roles: RoleDTO[] }) {
     const target = deleteTarget;
     startTransition(async () => {
       const result = await deleteRoleAction(target.id);
-      if (result.ok) toast.success("Role deleted");
+      if (result.ok) toast.success(t("rlRoleDeleted"));
       else toast.error(result.error);
       setDeleteTarget(null);
     });
@@ -64,19 +66,19 @@ export function RolesManager({ roles }: { roles: RoleDTO[] }) {
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{role.name}</span>
                   <Badge variant={role.isSystem ? "secondary" : "outline"}>
-                    {role.isSystem ? "Built-in" : "Custom"}
+                    {role.isSystem ? t("rlBuiltin") : t("rlCustom")}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  {role.permissionKeys.length} permissions · {role.memberCount}{" "}
-                  {role.memberCount === 1 ? "member" : "members"}
+                  {t("rlPerms", { count: role.permissionKeys.length })} ·{" "}
+                  {t("rlMembers", { count: role.memberCount })}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               {role.isSystem ? (
                 <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                  <Lock className="size-3" /> Locked
+                  <Lock className="size-3" /> {t("rlLocked")}
                 </span>
               ) : (
                 <>
@@ -109,7 +111,7 @@ export function RolesManager({ roles }: { roles: RoleDTO[] }) {
       </div>
 
       <Button variant="outline" size="sm" onClick={openCreate}>
-        <Plus /> New role
+        <Plus /> {t("rlNewRole")}
       </Button>
 
       <RoleFormDialog open={formOpen} onOpenChange={setFormOpen} role={editing} />
@@ -117,22 +119,24 @@ export function RolesManager({ roles }: { roles: RoleDTO[] }) {
       <Dialog open={deleteTarget != null} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete this role?</DialogTitle>
+            <DialogTitle>{t("rlDeleteTitle")}</DialogTitle>
             <DialogDescription>
-              {deleteTarget &&
-                `“${deleteTarget.name}” will be removed. ${
-                  deleteTarget.memberCount > 0
-                    ? `Its ${deleteTarget.memberCount} member(s) will be left without a role until reassigned.`
-                    : ""
-                }`}
+              {deleteTarget && (
+                <>
+                  {t("rlDeleteDesc", { name: deleteTarget.name })}
+                  {deleteTarget.memberCount > 0
+                    ? ` ${t("rlDeleteMembers", { count: deleteTarget.memberCount })}`
+                    : ""}
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={pending}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button variant="destructive" onClick={confirmDelete} disabled={pending}>
-              {pending ? "Deleting…" : "Delete role"}
+              {pending ? t("rlDeleting") : t("rlDeleteBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -150,6 +154,7 @@ function RoleFormDialog({
   onOpenChange: (open: boolean) => void;
   role: RoleDTO | null;
 }) {
+  const t = useTranslations("set");
   const isEdit = role != null;
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -175,7 +180,7 @@ function RoleFormDialog({
 
   function save() {
     if (name.trim().length < 2) {
-      setError("Enter a role name (2+ characters).");
+      setError(t("rlNameError"));
       return;
     }
     const payload = { name: name.trim(), permissions: [...selected] };
@@ -184,7 +189,7 @@ function RoleFormDialog({
         ? await updateRoleAction(role.id, payload)
         : await createRoleAction(payload);
       if (result.ok) {
-        toast.success(isEdit ? "Role updated" : "Role created");
+        toast.success(isEdit ? t("rlRoleUpdated") : t("rlRoleCreated"));
         onOpenChange(false);
       } else {
         setError(result.error);
@@ -197,18 +202,18 @@ function RoleFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit role" : "New role"}</DialogTitle>
-          <DialogDescription>Pick a name and the permissions this role grants.</DialogDescription>
+          <DialogTitle>{isEdit ? t("rlEditTitle") : t("rlNewTitle")}</DialogTitle>
+          <DialogDescription>{t("rlDialogDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="grid gap-1.5">
-            <Label htmlFor="role-name">Role name</Label>
+            <Label htmlFor="role-name">{t("rlNameLabel")}</Label>
             <Input
               id="role-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Front desk"
+              placeholder={t("rlNamePlaceholder")}
             />
             {error && <p className="text-destructive text-xs">{error}</p>}
           </div>
@@ -248,10 +253,10 @@ function RoleFormDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={save} disabled={pending}>
-            {pending ? "Saving…" : isEdit ? "Save changes" : "Create role"}
+            {pending ? t("saving") : isEdit ? t("save") : t("rlCreateBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

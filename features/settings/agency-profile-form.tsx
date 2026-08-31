@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { updateAgencyProfileAction } from "@/actions/settings";
@@ -30,6 +31,7 @@ export interface AgencyProfileValues {
 }
 
 export function AgencyProfileForm({ initial }: { initial: AgencyProfileValues }) {
+  const t = useTranslations("set");
   const [pending, startTransition] = useTransition();
   const {
     register,
@@ -52,7 +54,7 @@ export function AgencyProfileForm({ initial }: { initial: AgencyProfileValues })
     startTransition(async () => {
       const result = await updateAgencyProfileAction(parsed.data);
       if (result.ok) {
-        toast.success("Agency profile updated");
+        toast.success(t("profileUpdated"));
         reset(values); // clear the dirty state, keep the saved values
       } else {
         if (result.fieldErrors) {
@@ -72,42 +74,42 @@ export function AgencyProfileForm({ initial }: { initial: AgencyProfileValues })
     <form onSubmit={handleSubmit(submit)} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5 sm:col-span-2">
-          <Label htmlFor="name">Agency name</Label>
+          <Label htmlFor="name">{t("roName")}</Label>
           <Input id="name" {...register("name")} />
           {err("name")}
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="email">Contact email</Label>
+          <Label htmlFor="email">{t("roEmail")}</Label>
           <Input id="email" type="email" {...register("email")} />
           {err("email")}
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">{t("roPhone")}</Label>
           <Input id="phone" {...register("phone")} />
           {err("phone")}
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="whatsapp">WhatsApp</Label>
+          <Label htmlFor="whatsapp">{t("fWhatsapp")}</Label>
           <Input id="whatsapp" {...register("whatsapp")} />
           {err("whatsapp")}
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="address">Address</Label>
+          <Label htmlFor="address">{t("fAddress")}</Label>
           <Input id="address" {...register("address")} />
           {err("address")}
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="city">City</Label>
+          <Label htmlFor="city">{t("roCity")}</Label>
           <Input id="city" {...register("city")} />
           {err("city")}
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="country">Country</Label>
+          <Label htmlFor="country">{t("fCountry")}</Label>
           <Input id="country" {...register("country")} />
           {err("country")}
         </div>
         <div className="grid gap-1.5">
-          <Label>Currency</Label>
+          <Label>{t("roCurrency")}</Label>
           <Controller
             control={control}
             name="currency"
@@ -128,15 +130,19 @@ export function AgencyProfileForm({ initial }: { initial: AgencyProfileValues })
           />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="timezone">Timezone</Label>
+          <Label htmlFor="timezone">{t("roTimezone")}</Label>
           <Input id="timezone" {...register("timezone")} />
           {err("timezone")}
         </div>
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={pending || !isDirty}>
-          {pending ? "Saving…" : "Save changes"}
+        <Button
+          type="submit"
+          disabled={pending || !isDirty}
+          className="bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground hover:opacity-95"
+        >
+          {pending ? t("saving") : t("save")}
         </Button>
       </div>
     </form>

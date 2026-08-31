@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { MoreHorizontal, Pencil, Plus, Search, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,13 +43,10 @@ import { formatCurrency } from "@/lib/utils";
 import { CustomerFormDialog } from "./customer-form-dialog";
 import type { CustomerDTO, CustomerStatusValue } from "./types";
 
-const STATUS_META: Record<
-  CustomerStatusValue,
-  { label: string; variant: "secondary" | "success" | "destructive" }
-> = {
-  REGULAR: { label: "Regular", variant: "secondary" },
-  VIP: { label: "VIP", variant: "success" },
-  BLACKLISTED: { label: "Blacklisted", variant: "destructive" },
+const STATUS_VARIANT: Record<CustomerStatusValue, "secondary" | "success" | "destructive"> = {
+  REGULAR: "secondary",
+  VIP: "success",
+  BLACKLISTED: "destructive",
 };
 
 export function CustomersView({
@@ -58,6 +56,7 @@ export function CustomersView({
   customers: CustomerDTO[];
   canManage: boolean;
 }) {
+  const t = useTranslations("cust");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | CustomerStatusValue>("ALL");
   const [formOpen, setFormOpen] = useState(false);
@@ -92,7 +91,7 @@ export function CustomersView({
     const target = archiveTarget;
     startTransition(async () => {
       const result = await archiveCustomerAction(target.id);
-      if (result.ok) toast.success("Customer archived");
+      if (result.ok) toast.success(t("toastArchived"));
       else toast.error(result.error);
       setArchiveTarget(null);
     });
@@ -102,12 +101,12 @@ export function CustomersView({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-56 flex-1">
-          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search name, email, phone…"
-            className="pl-9"
+            placeholder={t("searchPlaceholder")}
+            className="ps-9"
           />
         </div>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
@@ -115,15 +114,18 @@ export function CustomersView({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All statuses</SelectItem>
-            <SelectItem value="REGULAR">Regular</SelectItem>
-            <SelectItem value="VIP">VIP</SelectItem>
-            <SelectItem value="BLACKLISTED">Blacklisted</SelectItem>
+            <SelectItem value="ALL">{t("allStatuses")}</SelectItem>
+            <SelectItem value="REGULAR">{t("sREGULAR")}</SelectItem>
+            <SelectItem value="VIP">{t("sVIP")}</SelectItem>
+            <SelectItem value="BLACKLISTED">{t("sBLACKLISTED")}</SelectItem>
           </SelectContent>
         </Select>
         {canManage && (
-          <Button onClick={openCreate}>
-            <Plus /> Add customer
+          <Button
+            onClick={openCreate}
+            className="bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground hover:opacity-95"
+          >
+            <Plus /> {t("addCustomer")}
           </Button>
         )}
       </div>
@@ -131,12 +133,12 @@ export function CustomersView({
       {customers.length === 0 ? (
         <EmptyState
           icon={UserRound}
-          title="No customers yet"
-          description="Add customers here, or create one on the fly when booking a reservation."
+          title={t("emptyTitle")}
+          description={t("emptyDesc")}
           action={
             canManage ? (
               <Button onClick={openCreate}>
-                <Plus /> Add your first customer
+                <Plus /> {t("addFirst")}
               </Button>
             ) : undefined
           }
@@ -146,12 +148,12 @@ export function CustomersView({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead className="hidden md:table-cell">Contact</TableHead>
-                <TableHead className="hidden sm:table-cell">Location</TableHead>
-                <TableHead>Bookings</TableHead>
-                <TableHead>Revenue</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t("colCustomer")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("colContact")}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t("colLocation")}</TableHead>
+                <TableHead>{t("colBookings")}</TableHead>
+                <TableHead>{t("colRevenue")}</TableHead>
+                <TableHead>{t("colStatus")}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -159,7 +161,7 @@ export function CustomersView({
               {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-muted-foreground py-10 text-center">
-                    No customers match your filters.
+                    {t("noMatch")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -182,9 +184,7 @@ export function CustomersView({
                     <TableCell className="tabular-nums">{c.totalBookings}</TableCell>
                     <TableCell className="tabular-nums">{formatCurrency(c.totalRevenue)}</TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_META[c.status].variant}>
-                        {STATUS_META[c.status].label}
-                      </Badge>
+                      <Badge variant={STATUS_VARIANT[c.status]}>{t(`s${c.status}`)}</Badge>
                     </TableCell>
                     <TableCell>
                       {canManage && (
@@ -192,18 +192,18 @@ export function CustomersView({
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="size-8">
                               <MoreHorizontal className="size-4" />
-                              <span className="sr-only">Actions</span>
+                              <span className="sr-only">{t("actions")}</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openEdit(c)}>
-                              <Pencil /> Edit
+                              <Pencil /> {t("edit")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               variant="destructive"
                               onClick={() => setArchiveTarget(c)}
                             >
-                              <Trash2 /> Archive
+                              <Trash2 /> {t("archive")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -226,22 +226,20 @@ export function CustomersView({
           >
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Archive this customer?</DialogTitle>
+                <DialogTitle>{t("archiveTitle")}</DialogTitle>
                 <DialogDescription>
-                  {archiveTarget && (
-                    <>
-                      {archiveTarget.firstName} {archiveTarget.lastName} will be hidden from the
-                      directory. Their past reservations are kept.
-                    </>
-                  )}
+                  {archiveTarget &&
+                    t("archiveDesc", {
+                      name: `${archiveTarget.firstName} ${archiveTarget.lastName}`,
+                    })}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setArchiveTarget(null)} disabled={pending}>
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button variant="destructive" onClick={confirmArchive} disabled={pending}>
-                  {pending ? "Archiving…" : "Archive"}
+                  {pending ? t("archiving") : t("archive")}
                 </Button>
               </DialogFooter>
             </DialogContent>

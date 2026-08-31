@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { assignRoleAction, setMemberStatusAction } from "@/actions/team";
@@ -34,13 +35,10 @@ export interface TeamMember {
   createdAt: string;
 }
 
-const STATUS_META: Record<
-  TeamMember["status"],
-  { label: string; variant: "success" | "secondary" | "destructive" }
-> = {
-  ACTIVE: { label: "Active", variant: "success" },
-  INVITED: { label: "Invited", variant: "secondary" },
-  SUSPENDED: { label: "Suspended", variant: "destructive" },
+const STATUS_VARIANT: Record<TeamMember["status"], "success" | "secondary" | "destructive"> = {
+  ACTIVE: "success",
+  INVITED: "secondary",
+  SUSPENDED: "destructive",
 };
 
 export function TeamManager({
@@ -52,6 +50,7 @@ export function TeamManager({
   roles: { id: string; name: string }[];
   currentUserId: string;
 }) {
+  const t = useTranslations("set");
   const [rows, setRows] = useState(members);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -63,7 +62,7 @@ export function TeamManager({
     startTransition(async () => {
       const result = await assignRoleAction(member.id, roleId);
       if (result.ok) {
-        toast.success("Role updated");
+        toast.success(t("tmRoleUpdated"));
       } else {
         setRows((r) => r.map((m) => (m.id === member.id ? { ...m, roleId: prev } : m)));
         toast.error(result.error);
@@ -79,7 +78,7 @@ export function TeamManager({
       const result = await setMemberStatusAction(member.id, next);
       if (result.ok) {
         setRows((r) => r.map((m) => (m.id === member.id ? { ...m, status: next } : m)));
-        toast.success(next === "ACTIVE" ? "Member reactivated" : "Member suspended");
+        toast.success(next === "ACTIVE" ? t("tmReactivated") : t("tmSuspendedToast"));
       } else {
         toast.error(result.error);
       }
@@ -92,11 +91,11 @@ export function TeamManager({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Member</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="hidden sm:table-cell">Joined</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("tmMember")}</TableHead>
+            <TableHead>{t("tmRole")}</TableHead>
+            <TableHead>{t("tmStatus")}</TableHead>
+            <TableHead className="hidden sm:table-cell">{t("tmJoined")}</TableHead>
+            <TableHead className="text-right">{t("tmActions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -114,7 +113,7 @@ export function TeamManager({
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-medium">{m.name}</span>
-                        {isSelf && <Badge variant="outline">You</Badge>}
+                        {isSelf && <Badge variant="outline">{t("tmYou")}</Badge>}
                       </div>
                       <p className="text-muted-foreground truncate text-xs">{m.email}</p>
                     </div>
@@ -127,7 +126,7 @@ export function TeamManager({
                     disabled={isSelf || busy}
                   >
                     <SelectTrigger className="w-36" size="sm">
-                      <SelectValue placeholder="No role" />
+                      <SelectValue placeholder={t("tmNoRole")} />
                     </SelectTrigger>
                     <SelectContent>
                       {roles.map((r) => (
@@ -139,9 +138,7 @@ export function TeamManager({
                   </Select>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={STATUS_META[m.status].variant}>
-                    {STATUS_META[m.status].label}
-                  </Badge>
+                  <Badge variant={STATUS_VARIANT[m.status]}>{t(`tm${m.status.charAt(0)}${m.status.slice(1).toLowerCase()}`)}</Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground hidden text-sm sm:table-cell">
                   {formatDate(m.createdAt)}
@@ -154,7 +151,7 @@ export function TeamManager({
                       onClick={() => toggleStatus(m)}
                       disabled={busy}
                     >
-                      {m.status === "ACTIVE" ? "Suspend" : "Activate"}
+                      {m.status === "ACTIVE" ? t("tmSuspend") : t("tmActivate")}
                     </Button>
                   )}
                 </TableCell>
