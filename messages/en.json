@@ -214,7 +214,9 @@
     "vEmail": "Enter a valid email",
     "vMessage": "Tell us a bit more (10+ characters)",
     "okTitle": "Message received",
-    "okDesc": "Email delivery goes live later — this wasn't sent anywhere yet."
+    "okDesc": "Email delivery goes live later — this wasn't sent anywhere yet.",
+    "sentTitle": "Message sent",
+    "sentDesc": "Thanks! We'll get back to you soon."
   },
   "faq": {
     "title": "Frequently asked questions",
@@ -565,6 +567,7 @@
     "aTeamStatus": "Changed a member's status",
     "save": "Save changes",
     "saving": "Saving…",
+    "cancel": "Cancel",
     "profileUpdated": "Agency profile updated",
     "fWhatsapp": "WhatsApp",
     "fAddress": "Address",

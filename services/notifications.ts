@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { isEmailConfigured, sendEmail } from "@/lib/email";
 
 /**
  * Notifications = a durable outbox + an in-app feed (see the Notification model).
@@ -73,7 +74,7 @@ async function queueOutbound(
     recipientPhone?: string | null;
   },
 ) {
-  await prisma.notification.create({
+  const notification = await prisma.notification.create({
     data: {
       agencyId,
       channel: data.channel,
@@ -85,9 +86,25 @@ async function queueOutbound(
       recipientPhone: data.recipientPhone ?? null,
     },
   });
-  // Delivery seam: no email/SMS/WhatsApp provider is configured yet, so the
-  // record stays PENDING in the outbox. Wiring a real provider (and flipping
-  // status to SENT/FAILED) plugs in here.
+
+  // Delivery seam. EMAIL is wired to Resend; SMS/WhatsApp providers plug in the
+  // same way later. Without a provider configured the record stays PENDING — a
+  // real queued outbox, honest about not having been sent. Best-effort: a send
+  // failure is recorded (status FAILED) but never throws to the caller.
+  if (data.channel === "EMAIL" && data.recipientEmail && isEmailConfigured()) {
+    const result = await sendEmail({
+      to: data.recipientEmail,
+      subject: data.title,
+      text: data.body,
+    });
+    await prisma.notification.update({
+      where: { id: notification.id },
+      data: result.ok
+        ? { status: "SENT", sentAt: new Date() }
+        : { status: "FAILED" },
+    });
+    if (!result.ok) console.error("Email delivery failed:", result.error);
+  }
 }
 
 // --- reservation events -----------------------------------------------------

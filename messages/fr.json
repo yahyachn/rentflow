@@ -214,7 +214,9 @@
     "vEmail": "Saisissez un e-mail valide",
     "vMessage": "Dites-nous en un peu plus (10+ caractères)",
     "okTitle": "Message reçu",
-    "okDesc": "L'envoi d'e-mails sera activé plus tard — ceci n'a été envoyé nulle part pour l'instant."
+    "okDesc": "L'envoi d'e-mails sera activé plus tard — ceci n'a été envoyé nulle part pour l'instant.",
+    "sentTitle": "Message envoyé",
+    "sentDesc": "Merci ! Nous vous répondrons bientôt."
   },
   "faq": {
     "title": "Questions fréquentes",
@@ -565,6 +567,7 @@
     "aTeamStatus": "A changé le statut d'un membre",
     "save": "Enregistrer les modifications",
     "saving": "Enregistrement…",
+    "cancel": "Annuler",
     "profileUpdated": "Profil de l'agence mis à jour",
     "fWhatsapp": "WhatsApp",
     "fAddress": "Adresse",

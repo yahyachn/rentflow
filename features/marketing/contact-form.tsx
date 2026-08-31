@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { sendContactMessageAction } from "@/actions/contact";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,14 +40,15 @@ export function ContactForm() {
     formState: { errors, isSubmitting },
   } = useForm<ContactInput>({ resolver: zodResolver(contactSchema) });
 
-  function onSubmit() {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        toast.success(t("okTitle"), { description: t("okDesc") });
-        reset();
-        resolve();
-      }, 500);
-    });
+  async function onSubmit(values: ContactInput) {
+    const result = await sendContactMessageAction(values);
+    if (result.ok && result.delivered) {
+      toast.success(t("sentTitle"), { description: t("sentDesc") });
+    } else {
+      // Not delivered (provider not configured yet) — accept honestly.
+      toast.success(t("okTitle"), { description: t("okDesc") });
+    }
+    reset();
   }
 
   return (
