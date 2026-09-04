@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -120,6 +120,7 @@ export function VehicleFormDialog({
   const isEdit = vehicle != null;
   const [pending, startTransition] = useTransition();
   const [images, setImages] = useState<VehicleImageDTO[]>(vehicle?.images ?? []);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -155,6 +156,8 @@ export function VehicleFormDialog({
           setError(key as keyof VehicleFormValues, { message: issue.message });
         }
       }
+      toast.error(t("vfInvalid"));
+      contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -182,7 +185,7 @@ export function VehicleFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-2xl">
+      <DialogContent ref={contentRef} className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-2xl">
         <DialogHeader className="border-b px-6 py-4">
           <DialogTitle>{isEdit ? t("vfEditTitle") : t("vfAddTitle")}</DialogTitle>
           <DialogDescription>{isEdit ? t("vfEditDesc") : t("vfAddDesc")}</DialogDescription>

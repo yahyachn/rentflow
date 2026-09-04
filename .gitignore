@@ -39,6 +39,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# locally-uploaded media (Cloudinary fallback — see app/api/uploads/route.ts)
+/public/uploads/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

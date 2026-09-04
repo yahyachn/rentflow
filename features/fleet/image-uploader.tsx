@@ -21,6 +21,33 @@ function withOneCover(list: VehicleImageDTO[]): VehicleImageDTO[] {
   return list.map((img, i) => ({ ...img, isCover: i === 0 }));
 }
 
+type CloudinarySignature = { cloudName: string; apiKey: string; timestamp: number; folder: string; signature: string };
+
+async function uploadToCloudinary(file: File, sig: CloudinarySignature): Promise<VehicleImageDTO | null> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("api_key", sig.apiKey);
+  form.append("timestamp", String(sig.timestamp));
+  form.append("folder", sig.folder);
+  form.append("signature", sig.signature);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, {
+    method: "POST",
+    body: form,
+  });
+  const json = (await res.json()) as { secure_url?: string; public_id?: string };
+  return res.ok && json.secure_url ? { url: json.secure_url, publicId: json.public_id ?? null, isCover: false } : null;
+}
+
+/** No Cloudinary account needed — see app/api/uploads/route.ts. */
+async function uploadLocally(file: File): Promise<VehicleImageDTO | null> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch("/api/uploads", { method: "POST", body: form });
+  const json = (await res.json()) as { url?: string };
+  return res.ok && json.url ? { url: json.url, publicId: null, isCover: false } : null;
+}
+
 export function ImageUploader({
   value,
   onChange,
@@ -57,11 +84,11 @@ export function ImageUploader({
     }
     if (accepted.length === 0) return;
 
-    // One signature is valid for this whole batch (Cloudinary accepts a
-    // recent timestamp), so fetch it once.
-    const sig = await getUploadSignatureAction();
-    if (!sig.ok) {
-      toast.error(sig.error);
+    // Cloudinary needs one signature for the whole batch (a recent timestamp
+    // is enough), fetched once; the local fallback needs no signature at all.
+    const sig = configured ? await getUploadSignatureAction() : null;
+    if (configured && !sig?.ok) {
+      toast.error(sig && !sig.ok ? sig.error : t("iuFailed", { name: accepted[0].name }));
       return;
     }
 
@@ -69,24 +96,11 @@ export function ImageUploader({
     const uploaded: VehicleImageDTO[] = [];
     for (const file of accepted) {
       try {
-        const form = new FormData();
-        form.append("file", file);
-        form.append("api_key", sig.data.apiKey);
-        form.append("timestamp", String(sig.data.timestamp));
-        form.append("folder", sig.data.folder);
-        form.append("signature", sig.data.signature);
-
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${sig.data.cloudName}/image/upload`,
-          { method: "POST", body: form },
-        );
-        const json = (await res.json()) as { secure_url?: string; public_id?: string; error?: { message?: string } };
-
-        if (res.ok && json.secure_url) {
-          uploaded.push({ url: json.secure_url, publicId: json.public_id ?? null, isCover: false });
-        } else {
-          toast.error(json.error?.message ?? t("iuFailed", { name: file.name }));
-        }
+        const image = sig?.ok
+          ? await uploadToCloudinary(file, sig.data)
+          : await uploadLocally(file);
+        if (image) uploaded.push(image);
+        else toast.error(t("iuFailed", { name: file.name }));
       } catch {
         toast.error(t("iuFailed", { name: file.name }));
       } finally {
@@ -119,7 +133,7 @@ export function ImageUploader({
 
       {!configured && (
         <p className="bg-muted/50 text-muted-foreground rounded-md border border-dashed px-3 py-2 text-xs">
-          {t("iuNeedCloudinary")}
+          {t("iuLocalStorage")}
         </p>
       )}
 
@@ -188,7 +202,7 @@ export function ImageUploader({
         type="button"
         variant="outline"
         onClick={() => inputRef.current?.click()}
-        disabled={!configured || busy || full}
+        disabled={busy || full}
       >
         {busy ? (
           <>

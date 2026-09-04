@@ -52,8 +52,17 @@ const optionalText = (max: number) =>
     z.string().max(max).optional(),
   );
 
+/** Accepts a Cloudinary (absolute) URL or a root-relative local path
+ * (`/uploads/...` — see app/api/uploads/route.ts, the no-Cloudinary
+ * fallback). Plain `z.string().url()` rejects relative paths outright,
+ * which silently failed the whole vehicle save whenever a locally-uploaded
+ * image was attached. */
+const imageUrlSchema = z
+  .string()
+  .refine((v) => v.startsWith("/") || /^https?:\/\//.test(v), "Enter a valid image URL");
+
 export const vehicleImageSchema = z.object({
-  url: z.string().url(),
+  url: imageUrlSchema,
   publicId: z.preprocess(
     (v) => (v === "" || v === null ? undefined : v),
     z.string().optional(),
