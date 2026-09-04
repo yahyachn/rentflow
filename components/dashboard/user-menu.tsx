@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { LogOut, Settings, User as UserIcon } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
@@ -47,14 +48,14 @@ export function UserMenu({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <a href="/dashboard/settings">
+          <Link href="/dashboard/settings">
             <UserIcon /> Profile
-          </a>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <a href="/dashboard/settings">
-            <Settings /> Agency settings
-          </a>
+          <Link href="/dashboard/settings">
+            <Settings /> Settings
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onSelect={handleSignOut}>

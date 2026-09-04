@@ -2,12 +2,24 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
-import { assignRoleAction, setMemberStatusAction } from "@/actions/team";
+import { assignRoleAction, createTeamMemberAction, setMemberStatusAction } from "@/actions/team";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -23,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { createTeamMemberSchema } from "@/validators/team";
 import { formatDate, initials } from "@/lib/utils";
 
 export interface TeamMember {
@@ -54,6 +67,31 @@ export function TeamManager({
   const [rows, setRows] = useState(members);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createPending, startCreateTransition] = useTransition();
+  const [createForm, setCreateForm] = useState({ name: "", email: "", password: "", roleId: "" });
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  function submitCreate() {
+    const parsed = createTeamMemberSchema.safeParse(createForm);
+    if (!parsed.success) {
+      setCreateError(parsed.error.issues[0]?.message ?? t("tmInvalid"));
+      return;
+    }
+    startCreateTransition(async () => {
+      const result = await createTeamMemberAction(parsed.data);
+      if (result.ok) {
+        toast.success(t("tmCreated"));
+        setCreateOpen(false);
+        setCreateForm({ name: "", email: "", password: "", roleId: "" });
+        setCreateError(null);
+        window.location.reload();
+      } else {
+        setCreateError(result.error);
+      }
+    });
+  }
 
   function changeRole(member: TeamMember, roleId: string) {
     const prev = member.roleId;
@@ -87,7 +125,76 @@ export function TeamManager({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogTrigger asChild>
+            <Button type="button" size="sm">
+              <Plus /> {t("tmNewMember")}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t("tmNewMember")}</DialogTitle>
+              <DialogDescription>{t("tmNewMemberDesc")}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="grid gap-1.5">
+                <Label htmlFor="tm-name">{t("tmName")}</Label>
+                <Input
+                  id="tm-name"
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="tm-email">{t("tmEmail")}</Label>
+                <Input
+                  id="tm-email"
+                  type="email"
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="tm-password">{t("tmPassword")}</Label>
+                <Input
+                  id="tm-password"
+                  type="password"
+                  value={createForm.password}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, password: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label>{t("tmRole")}</Label>
+                <Select
+                  value={createForm.roleId}
+                  onValueChange={(v) => setCreateForm((f) => ({ ...f, roleId: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("tmNoRole")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {createError && <p className="text-destructive text-xs">{createError}</p>}
+            </div>
+            <DialogFooter>
+              <Button type="button" onClick={submitCreate} disabled={createPending}>
+                {t("tmCreate")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -160,6 +267,7 @@ export function TeamManager({
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

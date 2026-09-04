@@ -6,7 +6,6 @@ import { listActivity } from "@/services/activity";
 import { listTeam } from "@/services/team";
 import { listRolesDetailed } from "@/services/roles";
 import { formatDate } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgencyProfileForm, type AgencyProfileValues } from "@/features/settings/agency-profile-form";
 import { TeamManager, type TeamMember } from "@/features/team/team-manager";
@@ -131,19 +130,6 @@ export default async function SettingsPage() {
               ))}
             </dl>
           )}
-
-          <div className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 border-t pt-4 text-xs">
-            <span>
-              {t("subdomain")}:{" "}
-              <span className="text-foreground font-medium">{agency.slug}.rentflow.ma</span>
-            </span>
-            <span>
-              {t("plan")}: <span className="text-foreground font-medium">{agency.plan}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              {t("status")}: <Badge variant="success">{agency.status}</Badge>
-            </span>
-          </div>
         </CardContent>
       </Card>
 

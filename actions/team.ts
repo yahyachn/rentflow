@@ -5,7 +5,8 @@ import type { UserStatus } from "@prisma/client";
 
 import { requireUser, userHasPermission } from "@/lib/tenant";
 import { logActivity } from "@/services/activity";
-import { assignRole, setMemberStatus } from "@/services/team";
+import { assignRole, createTeamMember, setMemberStatus } from "@/services/team";
+import { createTeamMemberSchema, type CreateTeamMemberInput } from "@/validators/team";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -20,6 +21,8 @@ function messageFor(err: unknown): string {
       return "You can't change your own role or status — ask another owner.";
     case "LAST_OWNER":
       return "You can't demote or suspend the last active owner.";
+    case "EMAIL_TAKEN":
+      return "That email is already used by another account.";
     default:
       return "Something went wrong. Please try again.";
   }
@@ -29,6 +32,25 @@ async function requireTeamManage() {
   const user = await requireUser();
   if (!(await userHasPermission("team.manage"))) throw new Error("FORBIDDEN");
   return user;
+}
+
+export async function createTeamMemberAction(input: CreateTeamMemberInput): Promise<ActionResult> {
+  const parsed = createTeamMemberSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Please fix the highlighted fields." };
+  }
+  try {
+    const user = await requireTeamManage();
+    const member = await createTeamMember(user.agencyId, parsed.data);
+    await logActivity(user.agencyId, user.id, "team.created", "User", member.id, member.name);
+    revalidatePath("/dashboard/settings");
+    return { ok: true };
+  } catch (err) {
+    if (err instanceof Error && err.message === "FORBIDDEN") {
+      return { ok: false, error: "You don't have permission to manage the team." };
+    }
+    return { ok: false, error: messageFor(err) };
+  }
 }
 
 export async function assignRoleAction(userId: string, roleId: string): Promise<ActionResult> {

@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -92,13 +91,6 @@ export function LoginForm() {
         {isPending && <Loader2 className="animate-spin" />}
         Sign in
       </Button>
-
-      <p className="text-muted-foreground text-center text-sm">
-        Don&apos;t have an agency yet?{" "}
-        <Link href="/register" className="text-primary underline-offset-4 hover:underline">
-          Start your free trial
-        </Link>
-      </p>
     </form>
   );
 }

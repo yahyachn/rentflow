@@ -8,15 +8,14 @@ import { prisma } from "@/lib/prisma";
 /**
  * Better Auth configuration.
  *
- * Multi-tenancy note: RentFlow does NOT use Better Auth's `organization`
- * plugin. Every dashboard user (`User` row) belongs to exactly one `Agency`
- * via a required `agencyId`, set at account-creation time by
- * `actions/auth.ts#registerAgency` (which provisions the Agency + its
- * default Owner/Manager/Employee roles in the same transaction before
- * calling `auth.api.signUpEmail`). This keeps our own `Role`/`Permission`
- * tables — richer than Better Auth's built-in org roles — as the single
- * source of truth for authorization. See lib/tenant.ts for how request
- * handlers read the current agency out of the session.
+ * This is a single-tenant product (one `Agency` row, no self-serve sign-up —
+ * `/register` doesn't exist; the agency + its Owner/Manager/Employee roles
+ * are provisioned once by `prisma/seed.ts` via `services/agency.ts#provisionAgency`).
+ * Every dashboard `User` still carries an `agencyId` (a required additional
+ * field, not Better Auth's `organization` plugin) purely so `Role`/
+ * `Permission`/every `services/*` query keep their existing tenant-scoped
+ * shape — see ARCHITECTURE.md. See lib/tenant.ts for how request handlers
+ * read the current user + agency out of the session.
  */
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
