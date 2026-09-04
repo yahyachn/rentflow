@@ -9,7 +9,8 @@
     "learnMore": "اعرف المزيد",
     "bookNow": "احجز الآن",
     "perDay": "/ يوم",
-    "from": "ابتداءً من"
+    "from": "ابتداءً من",
+    "whatsappUs": "تواصل معنا عبر واتساب"
   },
   "nav": {
     "home": "الرئيسية",
@@ -20,22 +21,23 @@
     "menu": "القائمة"
   },
   "hero": {
-    "badge": "الحجز متاح في جميع أنحاء المغرب",
-    "titleLine1": "استأجر",
-    "titleHighlight": "رحلتك القادمة",
-    "titleLine2": "سيارة أو دراجة نارية، بكل سهولة.",
-    "subtitle": "أسعار شفافة، مركبات موثوقة، وطلبات حجز فورية — مباشرةً من أسطول يُدار عبر RentFlow.",
-    "cityPlaceholder": "مدينة الاستلام",
-    "typePlaceholder": "نوع المركبة",
+    "badge": "تأجير سيارات فاخر • المغرب",
+    "titleLine1": "تأجير سيارات",
+    "titleHighlight": "فاخر",
+    "subtitle": "أسطول موثوق، خدمة استثنائية، وحجز في ثوانٍ معدودة — التجربة التي تستحقها رحلتك.",
+    "bookCta": "احجز مركبتك",
+    "whatsappCta": "تواصل معنا عبر واتساب",
+    "scroll": "اكتشف المزيد",
+    "trust": {
+      "cancellation": "إلغاء مجاني",
+      "airportDelivery": "توصيل للمطار",
+      "insurance": "تأمين شامل",
+      "noFees": "بدون رسوم خفية",
+      "support": "دعم على مدار الساعة"
+    },
     "cars": "سيارات",
     "motorcycles": "دراجات نارية",
-    "searchCta": "ابحث عن مركبة",
-    "statVehicles": "مركبة متاحة",
-    "statSupport": "الدعم",
-    "statBooking": "حجز عبر الإنترنت",
-    "trustNote": "بدون التزام · تأكيد سريع · الدفع في الوكالة",
-    "cardTitle": "جاهزة للانطلاق",
-    "cardSubtitle": "تأكيد فوري"
+    "whatsappPrefill": "مرحبًا، أنا مهتم باستئجار سيارة."
   },
   "vehicleCard": {
     "available": "متاحة",
@@ -239,7 +241,8 @@
     "reservations": "الحجوزات",
     "customers": "العملاء",
     "analytics": "التحليلات",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "website": "الموقع الإلكتروني"
   },
   "dash": {
     "welcome": "مرحبًا بعودتك، {name}",
@@ -448,7 +451,6 @@
     "toastVehUpdated": "تم تحديث المركبة",
     "toastVehAdded": "تمت إضافة المركبة",
     "iuImages": "الصور",
-    "iuNeedCloudinary": "يتطلب رفع الصور إعداد Cloudinary. أضف CLOUDINARY_CLOUD_NAME وCLOUDINARY_API_KEY وCLOUDINARY_API_SECRET إلى ملف .env (راجع README)، ثم أعد تشغيل الخادم. تبقى الصور الحالية قابلة للتعديل أدناه.",
     "iuCover": "الغلاف",
     "iuSetCover": "تعيين كغلاف",
     "iuRemove": "إزالة الصورة",
@@ -459,7 +461,9 @@
     "iuMax": "يمكنك إرفاق حتى {max} صور.",
     "iuUnsupported": "{name}: نوع ملف غير مدعوم.",
     "iuTooLarge": "{name}: أكبر من {mb} ميجابايت.",
-    "iuFailed": "فشل رفع {name}."
+    "iuFailed": "فشل رفع {name}.",
+    "iuLocalStorage": "يتم حفظ الصور على الخادم (لا حاجة لحساب Cloudinary). لاستضافة سحابية محسّنة، أضف إعدادات Cloudinary في .env.",
+    "vfInvalid": "يرجى تصحيح الحقول المحددة أعلاه."
   },
   "cust": {
     "title": "العملاء",
@@ -616,17 +620,162 @@
     "grpBilling": "الفوترة",
     "grpSettings": "الإعدادات",
     "perms": {
-      "fleetView": { "label": "عرض الأسطول", "desc": "رؤية المركبات والفئات والأسعار." },
-      "fleetManage": { "label": "إدارة الأسطول", "desc": "إنشاء وتعديل وأرشفة المركبات والأسعار والتوفر." },
-      "reservationsView": { "label": "عرض الحجوزات", "desc": "رؤية تقويم الحجز وقائمة الحجوزات." },
-      "reservationsManage": { "label": "إدارة الحجوزات", "desc": "إنشاء وتعديل وإلغاء الحجوزات." },
-      "reservationsApprove": { "label": "الموافقة على الحجوزات", "desc": "تأكيد الطلبات المعلّقة وتغيير الحالة." },
-      "customersView": { "label": "عرض العملاء", "desc": "رؤية دليل العملاء والملفات." },
-      "customersManage": { "label": "إدارة العملاء", "desc": "تعديل سجلات العملاء والملاحظات وحالة VIP/القائمة السوداء." },
-      "analyticsView": { "label": "عرض التحليلات", "desc": "رؤية لوحات الإيرادات والإشغال والأداء." },
-      "teamManage": { "label": "إدارة الفريق", "desc": "دعوة الموظفين وتعيين الأدوار." },
-      "billingManage": { "label": "إدارة الفوترة", "desc": "عرض الفواتير/المدفوعات وتهيئة إعدادات الفوترة." },
-      "settingsManage": { "label": "إدارة الإعدادات", "desc": "تعديل ملف الوكالة والعلامة والسياسات." }
-    }
+      "fleetView": {
+        "label": "عرض الأسطول",
+        "desc": "رؤية المركبات والفئات والأسعار."
+      },
+      "fleetManage": {
+        "label": "إدارة الأسطول",
+        "desc": "إنشاء وتعديل وأرشفة المركبات والأسعار والتوفر."
+      },
+      "reservationsView": {
+        "label": "عرض الحجوزات",
+        "desc": "رؤية تقويم الحجز وقائمة الحجوزات."
+      },
+      "reservationsManage": {
+        "label": "إدارة الحجوزات",
+        "desc": "إنشاء وتعديل وإلغاء الحجوزات."
+      },
+      "reservationsApprove": {
+        "label": "الموافقة على الحجوزات",
+        "desc": "تأكيد الطلبات المعلّقة وتغيير الحالة."
+      },
+      "customersView": {
+        "label": "عرض العملاء",
+        "desc": "رؤية دليل العملاء والملفات."
+      },
+      "customersManage": {
+        "label": "إدارة العملاء",
+        "desc": "تعديل سجلات العملاء والملاحظات وحالة VIP/القائمة السوداء."
+      },
+      "analyticsView": {
+        "label": "عرض التحليلات",
+        "desc": "رؤية لوحات الإيرادات والإشغال والأداء."
+      },
+      "teamManage": {
+        "label": "إدارة الفريق",
+        "desc": "دعوة الموظفين وتعيين الأدوار."
+      },
+      "billingManage": {
+        "label": "إدارة الفوترة",
+        "desc": "عرض الفواتير/المدفوعات وتهيئة إعدادات الفوترة."
+      },
+      "settingsManage": {
+        "label": "إدارة الإعدادات",
+        "desc": "تعديل ملف الوكالة والعلامة والسياسات."
+      }
+    },
+    "tmNewMember": "عضو جديد",
+    "tmNewMemberDesc": "أنشئ حساب دخول للوحة التحكم لموظف — سيتمكن من تسجيل الدخول فورًا بهذه الكلمة السرية.",
+    "tmName": "الاسم",
+    "tmEmail": "البريد الإلكتروني",
+    "tmPassword": "كلمة السر",
+    "tmCreate": "إنشاء الحساب",
+    "tmCreated": "تم إنشاء عضو الفريق.",
+    "tmInvalid": "يرجى تصحيح الحقول المحددة."
+  },
+  "web": {
+    "title": "الموقع الإلكتروني",
+    "subtitle": "خصّص الموقع العام لوكالتك — الصفحات والأقسام والمظهر.",
+    "noAccessTitle": "الوصول مقيّد",
+    "noAccessDesc": "ليس لديك صلاحية عرض الموقع الإلكتروني.",
+    "newPage": "صفحة جديدة",
+    "newPageDesc": "أنشئ صفحة جديدة لموقعك العام.",
+    "pageTitle": "عنوان الصفحة",
+    "pageSlug": "الرابط (slug)",
+    "invalid": "يرجى تصحيح الحقول المحددة.",
+    "create": "إنشاء",
+    "pagesTitle": "الصفحات",
+    "pagesDesc": "انقر على صفحة لتعديلها.",
+    "published": "منشورة",
+    "draft": "مسودة",
+    "themeTitle": "المظهر",
+    "themeDesc": "ألوان العلامة التجارية المستخدمة في الموقع العام.",
+    "primaryColor": "اللون الأساسي",
+    "accentColor": "لون التمييز",
+    "saveTheme": "حفظ المظهر",
+    "themeSaved": "تم حفظ المظهر.",
+    "publishRestricted": "المالك فقط يمكنه نشر تعديلات الموقع.",
+    "viewLiveSite": "عرض الموقع المباشر",
+    "pageCreated": "تم إنشاء الصفحة.",
+    "saving": "جارٍ الحفظ…",
+    "saved": "تم الحفظ",
+    "saveError": "فشل الحفظ",
+    "preview": "معاينة",
+    "viewLive": "عرض مباشر",
+    "publish": "نشر",
+    "addSection": "إضافة قسم",
+    "selectSection": "اختر قسمًا لتعديله.",
+    "emptyPage": "لا تحتوي هذه الصفحة على أي قسم بعد. أضف واحدًا للبدء.",
+    "reviewsPreviewNote": "ستظهر التقييمات المنشورة هنا في الموقع العام.",
+    "hidden": "مخفي",
+    "eyebrow": "عنوان علوي",
+    "image": "صورة",
+    "primaryButton": "الزر الأساسي",
+    "secondaryButton": "الزر الثانوي",
+    "heading": "العنوان",
+    "body": "النص",
+    "alignment": "المحاذاة",
+    "alignStart": "يسار",
+    "alignCenter": "وسط",
+    "altText": "النص البديل",
+    "caption": "التسمية التوضيحية",
+    "button": "زر",
+    "source": "المصدر",
+    "sourceFeatured": "المركبات المميزة",
+    "sourceLatest": "أحدث المركبات",
+    "sourceAll": "كل المركبات",
+    "vehicleType": "نوع المركبة",
+    "all": "الكل",
+    "cars": "سيارات",
+    "motorcycles": "دراجات نارية",
+    "categories": "الفئات",
+    "sort": "الترتيب",
+    "sortNewest": "الأحدث",
+    "sortPriceAsc": "السعر تصاعديًا",
+    "sortPriceDesc": "السعر تنازليًا",
+    "limit": "الحد الأقصى",
+    "showViewAllButton": "إظهار زر \"عرض الكل\"",
+    "items": "الأسئلة",
+    "question": "السؤال",
+    "answer": "الجواب",
+    "addQuestion": "إضافة سؤال",
+    "height": "الارتفاع",
+    "buttonLabel": "نص الزر",
+    "buttonLink": "الوجهة",
+    "buttonStyle": "النمط",
+    "styPrimary": "أساسي",
+    "stySecondary": "ثانوي",
+    "styOutline": "محدد",
+    "styGhost": "خفيف",
+    "linkKind_none": "بدون",
+    "linkKind_vehicles": "قائمة المركبات",
+    "linkKind_vehicle": "مركبة",
+    "linkKind_category": "فئة",
+    "linkKind_page": "صفحة",
+    "linkKind_contact": "صفحة الاتصال",
+    "linkKind_whatsapp": "واتساب",
+    "linkKind_phone": "هاتف",
+    "linkKind_email": "بريد إلكتروني",
+    "linkKind_anchor": "رابط داخل الصفحة",
+    "linkKind_external": "رابط خارجي",
+    "linkSlugPlaceholder": "المعرّف (slug)",
+    "blockType_hero": "الترويسة (Hero)",
+    "blockType_richText": "نص",
+    "blockType_image": "صورة",
+    "blockType_cta": "دعوة لاتخاذ إجراء",
+    "blockType_vehicleGrid": "شبكة المركبات",
+    "blockType_faq": "الأسئلة الشائعة",
+    "blockType_reviews": "آراء العملاء",
+    "blockType_spacer": "فراغ",
+    "fieldTitle": "العنوان",
+    "fieldSubtitle": "العنوان الفرعي",
+    "pageSlugHint": "يُنشأ تلقائيًا من العنوان — أحرف صغيرة وأرقام وشرطات فقط.",
+    "blockType_stats": "إحصائيات",
+    "statItems": "الأرقام الرئيسية",
+    "statValue": "القيمة",
+    "statIcon": "الأيقونة",
+    "statLabel": "التسمية",
+    "addStat": "إضافة رقم"
   }
 }

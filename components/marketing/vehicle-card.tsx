@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { ArrowUpRight, Fuel, Gauge, Settings2, Users } from "lucide-react";
 
 import type { PublicVehicle } from "@/services/vehicles";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, formatNumber } from "@/lib/utils";
 
 export function VehicleCard({ vehicle, className }: { vehicle: PublicVehicle; className?: string }) {
   const t = useTranslations("vehicleCard");
@@ -75,12 +75,12 @@ export function VehicleCard({ vehicle, className }: { vehicle: PublicVehicle; cl
           )}
           {vehicle.mileage != null && (
             <span className="flex items-center gap-1.5">
-              <Gauge className="size-3.5 text-primary/70" /> {vehicle.mileage.toLocaleString()} km
+              <Gauge className="size-3.5 text-primary/70" /> {formatNumber(vehicle.mileage)} km
             </span>
           )}
         </div>
 
-        <div className="flex items-center justify-between border-t border-white/10 pt-4">
+        <div className="flex items-center justify-between border-t border-border pt-4">
           <div>
             {dailyPrice ? (
               <>
@@ -95,7 +95,7 @@ export function VehicleCard({ vehicle, className }: { vehicle: PublicVehicle; cl
           </div>
           <Link
             href={`/vehicles/${vehicle.slug}`}
-            className="sheen inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-white/10"
+            className="sheen inline-flex items-center gap-1 rounded-full border border-border bg-foreground/5 px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-foreground/10"
           >
             {t("viewDetails")} <ArrowUpRight className="size-3.5" />
           </Link>

@@ -9,13 +9,23 @@ import { Reveal } from "@/components/marketing/reveal";
  * Renders real, published customer reviews (Review.isPublished = true).
  * No fabricated testimonials — an agency with no reviews simply omits it.
  */
-export async function ReviewsSection({ agencyId }: { agencyId: string }) {
+export async function ReviewsSection({
+  agencyId,
+  title,
+  limit = 6,
+}: {
+  agencyId: string;
+  /** Overrides the default translated heading (used by the Website Builder's
+   * "reviews" block, which lets an agency customize the title). */
+  title?: string;
+  limit?: number;
+}) {
   const [reviews, t] = await Promise.all([
     prisma.review.findMany({
       where: { agencyId, isPublished: true },
       include: { customer: true, vehicle: true },
       orderBy: { createdAt: "desc" },
-      take: 6,
+      take: limit,
     }),
     getTranslations("reviews"),
   ]);
@@ -26,7 +36,7 @@ export async function ReviewsSection({ agencyId }: { agencyId: string }) {
     <section className="mx-auto max-w-6xl px-4 py-16 lg:px-6 lg:py-20">
       <Reveal className="mx-auto max-w-xl text-center">
         <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-          {t("title")}
+          {title || t("title")}
         </h2>
       </Reveal>
 
@@ -51,7 +61,7 @@ export async function ReviewsSection({ agencyId }: { agencyId: string }) {
                   &ldquo;{review.comment}&rdquo;
                 </blockquote>
               )}
-              <figcaption className="flex items-center gap-3 border-t border-white/10 pt-4">
+              <figcaption className="flex items-center gap-3 border-t border-border pt-4">
                 <span className="text-primary-foreground flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[var(--gold)] text-xs font-semibold">
                   {initials(`${review.customer.firstName} ${review.customer.lastName}`)}
                 </span>

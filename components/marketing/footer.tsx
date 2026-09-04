@@ -33,7 +33,7 @@ export function MarketingFooter() {
   ];
 
   return (
-    <footer className="relative mt-8 border-t border-white/10">
+    <footer className="relative mt-8 border-t border-border">
       <div className="mx-auto max-w-6xl px-4 py-14 lg:px-6">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 space-y-4 md:col-span-1">
@@ -65,7 +65,7 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="text-muted-foreground mt-12 border-t border-white/10 pt-6 text-xs">
+        <div className="text-muted-foreground mt-12 border-t border-border pt-6 text-xs">
           © {new Date().getFullYear()} RentFlow. {t("rights")}
         </div>
       </div>

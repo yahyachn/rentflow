@@ -9,7 +9,8 @@
     "learnMore": "En savoir plus",
     "bookNow": "Réserver",
     "perDay": "/ jour",
-    "from": "À partir de"
+    "from": "À partir de",
+    "whatsappUs": "Nous contacter sur WhatsApp"
   },
   "nav": {
     "home": "Accueil",
@@ -20,22 +21,23 @@
     "menu": "Menu"
   },
   "hero": {
-    "badge": "Réservation partout au Maroc",
-    "titleLine1": "Louez votre",
-    "titleHighlight": "prochaine évasion",
-    "titleLine2": "voiture ou moto, sans effort.",
-    "subtitle": "Tarifs transparents, véhicules vérifiés et réservation instantanée — directement depuis une flotte gérée sur RentFlow.",
-    "cityPlaceholder": "Ville de prise en charge",
-    "typePlaceholder": "Type de véhicule",
+    "badge": "Location premium • Maroc",
+    "titleLine1": "Location de voitures",
+    "titleHighlight": "premium",
+    "subtitle": "Une flotte vérifiée, un service irréprochable et une réservation en quelques secondes — l'expérience que votre trajet mérite.",
+    "bookCta": "Réserver votre véhicule",
+    "whatsappCta": "Contactez-nous sur WhatsApp",
+    "scroll": "Découvrir",
+    "trust": {
+      "cancellation": "Annulation gratuite",
+      "airportDelivery": "Livraison à l'aéroport",
+      "insurance": "Assurance complète",
+      "noFees": "Sans frais cachés",
+      "support": "Support 24/7"
+    },
     "cars": "Voitures",
     "motorcycles": "Motos",
-    "searchCta": "Rechercher un véhicule",
-    "statVehicles": "Véhicules disponibles",
-    "statSupport": "Assistance",
-    "statBooking": "Réservation en ligne",
-    "trustNote": "Sans engagement · Confirmation rapide · Paiement à l'agence",
-    "cardTitle": "Prêt à partir",
-    "cardSubtitle": "Confirmation instantanée"
+    "whatsappPrefill": "Bonjour, je suis intéressé(e) par la location d'un véhicule."
   },
   "vehicleCard": {
     "available": "Disponible",
@@ -239,7 +241,8 @@
     "reservations": "Réservations",
     "customers": "Clients",
     "analytics": "Analyses",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "website": "Site web"
   },
   "dash": {
     "welcome": "Bon retour, {name}",
@@ -448,7 +451,6 @@
     "toastVehUpdated": "Véhicule mis à jour",
     "toastVehAdded": "Véhicule ajouté",
     "iuImages": "Images",
-    "iuNeedCloudinary": "Le téléversement d'images nécessite la configuration de Cloudinary. Ajoutez CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY et CLOUDINARY_API_SECRET à .env (voir le README), puis redémarrez le serveur. Les images existantes restent modifiables ci-dessous.",
     "iuCover": "Couverture",
     "iuSetCover": "Définir comme couverture",
     "iuRemove": "Supprimer l'image",
@@ -459,7 +461,9 @@
     "iuMax": "Vous pouvez joindre jusqu'à {max} images.",
     "iuUnsupported": "{name} : type de fichier non pris en charge.",
     "iuTooLarge": "{name} : dépasse {mb} Mo.",
-    "iuFailed": "Échec du téléversement de {name}."
+    "iuFailed": "Échec du téléversement de {name}.",
+    "iuLocalStorage": "Les images sont enregistrées sur le serveur (aucun compte Cloudinary requis). Pour un hébergement cloud optimisé, configure Cloudinary dans .env.",
+    "vfInvalid": "Merci de corriger les champs en surbrillance ci-dessus."
   },
   "cust": {
     "title": "Clients",
@@ -616,17 +620,162 @@
     "grpBilling": "Facturation",
     "grpSettings": "Paramètres",
     "perms": {
-      "fleetView": { "label": "Voir la flotte", "desc": "Voir les véhicules, catégories et tarifs." },
-      "fleetManage": { "label": "Gérer la flotte", "desc": "Créer, modifier et archiver véhicules, tarifs et disponibilité." },
-      "reservationsView": { "label": "Voir les réservations", "desc": "Voir le calendrier et la liste des réservations." },
-      "reservationsManage": { "label": "Gérer les réservations", "desc": "Créer, modifier et annuler des réservations." },
-      "reservationsApprove": { "label": "Approuver les réservations", "desc": "Confirmer les demandes en attente et changer le statut." },
-      "customersView": { "label": "Voir les clients", "desc": "Voir le répertoire et les profils clients." },
-      "customersManage": { "label": "Gérer les clients", "desc": "Modifier les fiches, notes et statut VIP/liste noire." },
-      "analyticsView": { "label": "Voir les analyses", "desc": "Voir les tableaux de bord revenus, occupation et performance." },
-      "teamManage": { "label": "Gérer l'équipe", "desc": "Inviter du personnel et attribuer des rôles." },
-      "billingManage": { "label": "Gérer la facturation", "desc": "Voir factures/paiements et configurer la facturation." },
-      "settingsManage": { "label": "Gérer les paramètres", "desc": "Modifier le profil de l'agence, la marque et les politiques." }
-    }
+      "fleetView": {
+        "label": "Voir la flotte",
+        "desc": "Voir les véhicules, catégories et tarifs."
+      },
+      "fleetManage": {
+        "label": "Gérer la flotte",
+        "desc": "Créer, modifier et archiver véhicules, tarifs et disponibilité."
+      },
+      "reservationsView": {
+        "label": "Voir les réservations",
+        "desc": "Voir le calendrier et la liste des réservations."
+      },
+      "reservationsManage": {
+        "label": "Gérer les réservations",
+        "desc": "Créer, modifier et annuler des réservations."
+      },
+      "reservationsApprove": {
+        "label": "Approuver les réservations",
+        "desc": "Confirmer les demandes en attente et changer le statut."
+      },
+      "customersView": {
+        "label": "Voir les clients",
+        "desc": "Voir le répertoire et les profils clients."
+      },
+      "customersManage": {
+        "label": "Gérer les clients",
+        "desc": "Modifier les fiches, notes et statut VIP/liste noire."
+      },
+      "analyticsView": {
+        "label": "Voir les analyses",
+        "desc": "Voir les tableaux de bord revenus, occupation et performance."
+      },
+      "teamManage": {
+        "label": "Gérer l'équipe",
+        "desc": "Inviter du personnel et attribuer des rôles."
+      },
+      "billingManage": {
+        "label": "Gérer la facturation",
+        "desc": "Voir factures/paiements et configurer la facturation."
+      },
+      "settingsManage": {
+        "label": "Gérer les paramètres",
+        "desc": "Modifier le profil de l'agence, la marque et les politiques."
+      }
+    },
+    "tmNewMember": "Nouveau membre",
+    "tmNewMemberDesc": "Crée un accès dashboard pour un employé — il pourra se connecter immédiatement avec ce mot de passe.",
+    "tmName": "Nom",
+    "tmEmail": "Email",
+    "tmPassword": "Mot de passe",
+    "tmCreate": "Créer le compte",
+    "tmCreated": "Membre de l'équipe créé.",
+    "tmInvalid": "Merci de corriger les champs en surbrillance."
+  },
+  "web": {
+    "title": "Site web",
+    "subtitle": "Personnalisez le site public de votre agence — pages, sections, thème.",
+    "noAccessTitle": "Accès restreint",
+    "noAccessDesc": "Vous n'avez pas la permission de voir le site web.",
+    "newPage": "Nouvelle page",
+    "newPageDesc": "Créez une nouvelle page pour votre site public.",
+    "pageTitle": "Titre de la page",
+    "pageSlug": "URL (slug)",
+    "invalid": "Veuillez corriger les champs en surbrillance.",
+    "create": "Créer",
+    "pagesTitle": "Pages",
+    "pagesDesc": "Cliquez sur une page pour l'éditer.",
+    "published": "Publiée",
+    "draft": "Brouillon",
+    "themeTitle": "Thème",
+    "themeDesc": "Couleurs de marque utilisées sur le site public.",
+    "primaryColor": "Couleur principale",
+    "accentColor": "Couleur d'accent",
+    "saveTheme": "Enregistrer le thème",
+    "themeSaved": "Thème enregistré.",
+    "publishRestricted": "Seul le propriétaire peut publier les modifications du site.",
+    "viewLiveSite": "Voir le site en ligne",
+    "pageCreated": "Page créée.",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "saveError": "Échec de l'enregistrement",
+    "preview": "Aperçu",
+    "viewLive": "Voir en ligne",
+    "publish": "Publier",
+    "addSection": "Ajouter une section",
+    "selectSection": "Sélectionnez une section pour la modifier.",
+    "emptyPage": "Cette page n'a encore aucune section. Ajoutez-en une pour commencer.",
+    "reviewsPreviewNote": "Les avis publiés s'afficheront ici sur le site public.",
+    "hidden": "Masqué",
+    "eyebrow": "Sur-titre",
+    "image": "Image",
+    "primaryButton": "Bouton principal",
+    "secondaryButton": "Bouton secondaire",
+    "heading": "Titre",
+    "body": "Texte",
+    "alignment": "Alignement",
+    "alignStart": "Gauche",
+    "alignCenter": "Centré",
+    "altText": "Texte alternatif",
+    "caption": "Légende",
+    "button": "Bouton",
+    "source": "Source",
+    "sourceFeatured": "Véhicules en vedette",
+    "sourceLatest": "Véhicules récents",
+    "sourceAll": "Tous les véhicules",
+    "vehicleType": "Type de véhicule",
+    "all": "Tous",
+    "cars": "Voitures",
+    "motorcycles": "Motos",
+    "categories": "Catégories",
+    "sort": "Tri",
+    "sortNewest": "Plus récents",
+    "sortPriceAsc": "Prix croissant",
+    "sortPriceDesc": "Prix décroissant",
+    "limit": "Nombre maximum",
+    "showViewAllButton": "Afficher le bouton \"Tout voir\"",
+    "items": "Questions",
+    "question": "Question",
+    "answer": "Réponse",
+    "addQuestion": "Ajouter une question",
+    "height": "Hauteur",
+    "buttonLabel": "Texte du bouton",
+    "buttonLink": "Destination",
+    "buttonStyle": "Style",
+    "styPrimary": "Principal",
+    "stySecondary": "Secondaire",
+    "styOutline": "Contour",
+    "styGhost": "Discret",
+    "linkKind_none": "Aucune",
+    "linkKind_vehicles": "Liste des véhicules",
+    "linkKind_vehicle": "Un véhicule",
+    "linkKind_category": "Une catégorie",
+    "linkKind_page": "Une page",
+    "linkKind_contact": "Page contact",
+    "linkKind_whatsapp": "WhatsApp",
+    "linkKind_phone": "Téléphone",
+    "linkKind_email": "Email",
+    "linkKind_anchor": "Ancre sur la page",
+    "linkKind_external": "URL externe",
+    "linkSlugPlaceholder": "identifiant (slug)",
+    "blockType_hero": "En-tête (Hero)",
+    "blockType_richText": "Texte",
+    "blockType_image": "Image",
+    "blockType_cta": "Appel à l'action",
+    "blockType_vehicleGrid": "Grille de véhicules",
+    "blockType_faq": "FAQ",
+    "blockType_reviews": "Avis clients",
+    "blockType_spacer": "Espacement",
+    "fieldTitle": "Titre",
+    "fieldSubtitle": "Sous-titre",
+    "pageSlugHint": "Généré automatiquement à partir du titre — lettres minuscules, chiffres et tirets uniquement.",
+    "blockType_stats": "Statistiques",
+    "statItems": "Chiffres clés",
+    "statValue": "Valeur",
+    "statIcon": "Icône",
+    "statLabel": "Libellé",
+    "addStat": "Ajouter un chiffre"
   }
 }

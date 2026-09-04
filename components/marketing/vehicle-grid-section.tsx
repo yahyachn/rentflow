@@ -12,7 +12,7 @@ export function VehicleGridSection({
   vehicles,
   viewAllHref,
 }: {
-  title: string;
+  title?: string;
   description?: string;
   vehicles: PublicVehicle[];
   viewAllHref?: string;
@@ -24,7 +24,9 @@ export function VehicleGridSection({
     <section className="mx-auto max-w-6xl px-4 py-16 lg:px-6 lg:py-20">
       <Reveal className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h2>
+          {title && (
+            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h2>
+          )}
           {description && <p className="text-muted-foreground mt-2">{description}</p>}
         </div>
         {viewAllHref && (

@@ -184,11 +184,64 @@
 }
 
 /* ================================================================== */
-/* DARK-LUXURY MARKETING SHELL                                         */
-/* The public site always renders in the premium dark palette,        */
-/* independent of the dashboard's light/dark theme toggle.            */
+/* LUXURY MARKETING SHELL                                              */
+/* The public site gets its own premium palette (warm-gold accent,    */
+/* layered background glow), in both light and dark — driven by the   */
+/* same theme toggle as the dashboard (see components/shared/theme-   */
+/* toggle.tsx), instead of being locked to one mode.                  */
 /* ================================================================== */
 .marketing-shell {
+  color-scheme: light;
+
+  --background: oklch(0.99 0.004 265);
+  --foreground: oklch(0.17 0.02 265);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.17 0.02 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.17 0.02 265);
+
+  --primary: oklch(0.549 0.207 262.1);
+  --primary-foreground: oklch(0.98 0.005 265);
+
+  --secondary: oklch(0.95 0.008 265);
+  --secondary-foreground: oklch(0.17 0.02 265);
+
+  --muted: oklch(0.96 0.006 265);
+  --muted-foreground: oklch(0.45 0.02 265);
+
+  --accent: oklch(0.696 0.148 162.5);
+  --accent-foreground: oklch(0.15 0.03 165);
+
+  /* Luxury warm-gold accent, unique to the marketing surface. */
+  --gold: oklch(0.68 0.13 78);
+  --gold-soft: oklch(0.8 0.1 84);
+
+  --border: oklch(0.9 0.008 265);
+  --input: oklch(0.9 0.008 265);
+  --ring: oklch(0.549 0.207 262.1);
+
+  background-color: oklch(0.985 0.005 265);
+  background-image:
+    radial-gradient(
+      42rem 42rem at 82% -8%,
+      color-mix(in oklch, var(--primary) 12%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      38rem 38rem at 5% 8%,
+      color-mix(in oklch, var(--gold) 10%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      50rem 40rem at 50% 120%,
+      color-mix(in oklch, var(--accent) 8%, transparent),
+      transparent 60%
+    );
+  background-repeat: no-repeat;
+}
+
+.dark .marketing-shell {
   color-scheme: dark;
 
   --background: oklch(0.135 0.021 264);
@@ -211,7 +264,6 @@
   --accent: oklch(0.696 0.148 162.5);
   --accent-foreground: oklch(0.13 0.03 165);
 
-  /* Luxury warm-gold accent, unique to the marketing surface. */
   --gold: oklch(0.83 0.13 84);
   --gold-soft: oklch(0.9 0.09 90);
 

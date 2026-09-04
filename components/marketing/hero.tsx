@@ -1,173 +1,140 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { CalendarIcon, Gauge, MapPin, Search, Sparkles, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { ArrowDown, Check, MessageCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { TiltCard } from "@/components/marketing/tilt-card";
+import { whatsappLink } from "@/lib/utils";
+
+const TRUST_KEYS = ["cancellation", "airportDelivery", "insurance", "noFees", "support"] as const;
+
+/** Curated fallback for agencies that haven't set their own
+ * `Agency.coverImageUrl` yet (verified to load, deliberately picked for a
+ * rental-fleet mood — open road, golden hour, mountains — over an
+ * exotic-supercar shot). Swapped out automatically the moment an agency
+ * uploads its own hero photo. */
+const DEFAULT_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=2400&q=80";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 22 },
   show: { opacity: 1, y: 0 },
 };
 
-export function Hero() {
-  const router = useRouter();
+/**
+ * The hero is a deliberate exception to the site's light/dark toggle: it's a
+ * full-bleed photo-with-dark-overlay band so its white text stays legible
+ * regardless of the site's light/dark toggle — the same pattern premium
+ * sites use for a hero band inside an otherwise light page.
+ */
+export function Hero({ agency }: { agency: { whatsapp: string | null; coverImageUrl: string | null } }) {
   const t = useTranslations("hero");
-  const [city, setCity] = useState("");
-  const [type, setType] = useState<string>("");
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (type) params.set("type", type);
-    if (city) params.set("city", city);
-    router.push(`/vehicles${params.toString() ? `?${params}` : ""}`);
-  }
+  const waLink = whatsappLink(agency.whatsapp, t("whatsappPrefill"));
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Floating aurora orbs */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="animate-float-slow absolute -top-24 end-[-6rem] size-[26rem] rounded-full bg-primary/25 blur-3xl" />
-        <div className="animate-float absolute top-40 start-[-8rem] size-[22rem] rounded-full bg-[var(--gold)]/15 blur-3xl" />
+    <section className="relative isolate flex min-h-[88svh] items-center overflow-hidden text-white">
+      <div className="absolute inset-0 -z-20 bg-[oklch(0.1_0.02_264)]">
+        <Image
+          src={agency.coverImageUrl || DEFAULT_HERO_IMAGE}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.06_0.01_264)] via-[oklch(0.08_0.015_264)/78%] to-[oklch(0.1_0.02_264)/60%]" />
+        <div className="absolute inset-0 bg-black/40" />
       </div>
 
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-16 pb-16 lg:grid-cols-[1.05fr_.95fr] lg:px-6 lg:pt-24 lg:pb-24">
-        {/* Left — copy + search */}
-        <motion.div
-          initial="hidden"
-          animate="show"
-          transition={{ staggerChildren: 0.09 }}
-          className="text-center lg:text-start"
-        >
+      <div className="mx-auto w-full max-w-4xl px-4 py-28 text-center sm:py-32 lg:px-6">
+        <motion.div initial="hidden" animate="show" transition={{ staggerChildren: 0.09, delayChildren: 0.05 }}>
           <motion.span
             variants={fadeUp}
             transition={{ duration: 0.5 }}
-            className="glass inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium text-foreground/90"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white/90 uppercase backdrop-blur-md"
           >
-            <Sparkles className="size-3.5 text-[var(--gold)]" />
+            <span className="relative flex size-1.5">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-500 opacity-75" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-red-500" />
+            </span>
             {t("badge")}
           </motion.span>
 
           <motion.h1
             variants={fadeUp}
-            transition={{ duration: 0.55 }}
-            className="font-display mt-5 text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl"
+            transition={{ duration: 0.6 }}
+            className="font-display mt-6 text-5xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl lg:text-7xl"
           >
-            {t("titleLine1")}{" "}
-            <span className="text-gradient-shimmer">{t("titleHighlight")}</span>
-            <br className="hidden sm:block" /> {t("titleLine2")}
+            {t("titleLine1")} <span className="text-[var(--gold)]">{t("titleHighlight")}</span>
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
-            transition={{ duration: 0.55 }}
-            className="text-muted-foreground mx-auto mt-5 max-w-xl text-base text-balance lg:mx-0 lg:text-lg"
+            transition={{ duration: 0.6 }}
+            className="mx-auto mt-6 max-w-xl text-base text-balance text-white/75 sm:text-lg"
           >
             {t("subtitle")}
           </motion.p>
 
-          {/* Search bar */}
-          <motion.form
+          <motion.div
             variants={fadeUp}
-            transition={{ duration: 0.55 }}
-            onSubmit={handleSearch}
-            className="glass-strong mx-auto mt-8 flex max-w-xl flex-col gap-2 rounded-2xl p-2 lg:mx-0 sm:flex-row sm:items-center"
+            transition={{ duration: 0.6 }}
+            className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            <div className="relative flex-1">
-              <MapPin className="text-muted-foreground pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2" />
-              <Input
-                placeholder={t("cityPlaceholder")}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="border-0 bg-transparent ps-9 shadow-none focus-visible:ring-0"
-              />
-            </div>
-            <div className="bg-border hidden h-8 w-px sm:block" />
-            <div className="flex-1">
-              <Select value={type} onValueChange={setType}>
-                <SelectTrigger className="w-full border-0 bg-transparent shadow-none focus-visible:ring-0">
-                  <CalendarIcon className="text-muted-foreground size-4" />
-                  <SelectValue placeholder={t("typePlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CAR">{t("cars")}</SelectItem>
-                  <SelectItem value="MOTORCYCLE">{t("motorcycles")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <Button
-              type="submit"
+              asChild
               size="lg"
-              className="sheen glow-primary rounded-xl bg-gradient-to-r from-primary to-[var(--gold)] font-semibold text-primary-foreground hover:opacity-95 sm:w-auto"
+              className="sheen glow-primary w-full rounded-full bg-gradient-to-r from-primary to-[var(--gold)] px-8 font-semibold text-primary-foreground hover:opacity-95 sm:w-auto"
             >
-              <Search /> {t("searchCta")}
+              <Link href="/vehicles">{t("bookCta")}</Link>
             </Button>
-          </motion.form>
-
-          <motion.p
-            variants={fadeUp}
-            transition={{ duration: 0.55 }}
-            className="text-muted-foreground/80 mt-4 text-xs"
-          >
-            {t("trustNote")}
-          </motion.p>
-        </motion.div>
-
-        {/* Right — 3D showcase card */}
-        <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.15 }}
-          className="mx-auto w-full max-w-sm lg:max-w-none"
-        >
-          <TiltCard className="relative">
-            <div className="glass-strong relative overflow-hidden rounded-3xl p-6">
-              <div className="absolute -top-16 end-[-4rem] size-56 rounded-full bg-primary/30 blur-3xl" />
-              <div className="relative flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--gold)]/15 px-3 py-1 text-xs font-medium text-[var(--gold-soft)]">
-                  <Star className="size-3.5 fill-current" /> {t("cardTitle")}
-                </span>
-                <span className="text-muted-foreground text-xs">{t("cardSubtitle")}</span>
-              </div>
-
-              {/* Stylized vehicle silhouette */}
-              <div
-                className="relative mt-6 flex h-40 items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-transparent"
-                style={{ transform: "translateZ(40px)" }}
+            {waLink && (
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="w-full rounded-full border-white/25 bg-white/5 px-8 font-semibold text-white backdrop-blur-md hover:bg-white/15 sm:w-auto"
               >
-                <Gauge className="size-20 text-primary/80" strokeWidth={1.25} />
-                <div className="animate-pulse-glow absolute inset-0 -z-10 rounded-2xl bg-primary/20 blur-2xl" />
-              </div>
+                <a href={waLink} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle /> {t("whatsappCta")}
+                </a>
+              </Button>
+            )}
+          </motion.div>
 
-              <div className="mt-6 grid grid-cols-3 gap-3" style={{ transform: "translateZ(28px)" }}>
-                {[
-                  { v: "150+", k: t("statVehicles") },
-                  { v: "24/7", k: t("statSupport") },
-                  { v: "100%", k: t("statBooking") },
-                ].map((s) => (
-                  <div key={s.k} className="glass rounded-xl p-3 text-center">
-                    <p className="font-display text-lg font-semibold text-foreground">{s.v}</p>
-                    <p className="text-muted-foreground mt-0.5 text-[11px] leading-tight">{s.k}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TiltCard>
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.6 }}
+            className="mx-auto mt-10 flex max-w-2xl flex-wrap items-center justify-center gap-x-5 gap-y-2.5 text-xs font-medium text-white/65 sm:text-[13px]"
+          >
+            {TRUST_KEYS.map((key) => (
+              <span key={key} className="inline-flex items-center gap-1.5">
+                <Check className="size-3.5 shrink-0 text-[var(--gold)]" />
+                {t(`trust.${key}`)}
+              </span>
+            ))}
+          </motion.div>
         </motion.div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1.1 }}
+        className="absolute inset-x-0 bottom-7 flex justify-center"
+      >
+        <motion.div
+          animate={{ y: [0, 7, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center gap-1.5 text-white/50"
+        >
+          <span className="text-[10px] font-medium tracking-[0.2em] uppercase">{t("scroll")}</span>
+          <ArrowDown className="size-4" />
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

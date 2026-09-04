@@ -20,7 +20,7 @@ import { getRelatedVehicles, getVehicleBySlug } from "@/services/vehicles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VehicleGridSection } from "@/components/marketing/vehicle-grid-section";
 import { ReserveDialog } from "@/features/vehicles/reserve-dialog";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatNumber } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -141,13 +141,13 @@ export default async function VehicleDetailPage({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4 border-y border-white/10 py-6 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 border-y border-border py-6 sm:grid-cols-4">
             <SpecIcon icon={Settings2} label={transLabel} />
             <SpecIcon icon={Fuel} label={fuelLabel} />
             {vehicle.seats && <SpecIcon icon={Users} label={t("seats", { count: vehicle.seats })} />}
             {vehicle.doors && <SpecIcon icon={DoorOpen} label={t("doors", { count: vehicle.doors })} />}
             {vehicle.mileage != null && (
-              <SpecIcon icon={Gauge} label={`${vehicle.mileage.toLocaleString()} km`} />
+              <SpecIcon icon={Gauge} label={`${formatNumber(vehicle.mileage)} km`} />
             )}
           </div>
 
@@ -166,7 +166,7 @@ export default async function VehicleDetailPage({
               {specs.map((spec) => (
                 <div
                   key={spec.label}
-                  className="flex justify-between border-b border-white/10 py-2 text-sm"
+                  className="flex justify-between border-b border-border py-2 text-sm"
                 >
                   <dt className="text-muted-foreground">{spec.label}</dt>
                   <dd className="font-medium">{spec.value}</dd>
@@ -180,7 +180,7 @@ export default async function VehicleDetailPage({
           <div className="glass-strong sticky top-24 space-y-5 rounded-2xl p-6">
             {vehicle.pricing.length > 0 ? (
               <Tabs defaultValue={vehicle.pricing[0]?.period}>
-                <TabsList className="w-full bg-white/5">
+                <TabsList className="w-full bg-foreground/5">
                   {vehicle.pricing.map((p) => (
                     <TabsTrigger key={p.id} value={p.period} className="flex-1">
                       {t(`period${p.period}`)}

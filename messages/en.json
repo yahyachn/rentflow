@@ -9,7 +9,8 @@
     "learnMore": "Learn more",
     "bookNow": "Book now",
     "perDay": "/ day",
-    "from": "From"
+    "from": "From",
+    "whatsappUs": "WhatsApp Us"
   },
   "nav": {
     "home": "Home",
@@ -20,22 +21,23 @@
     "menu": "Menu"
   },
   "hero": {
-    "badge": "Now booking across Morocco",
-    "titleLine1": "Rent your",
-    "titleHighlight": "next escape",
-    "titleLine2": "car or motorcycle, hassle-free.",
-    "subtitle": "Transparent pricing, verified vehicles, and instant reservation requests — straight from a fleet run on RentFlow.",
-    "cityPlaceholder": "Pickup city",
-    "typePlaceholder": "Vehicle type",
+    "badge": "Premium Car Rental • Morocco",
+    "titleLine1": "Premium Car Rental",
+    "titleHighlight": "in Morocco",
+    "subtitle": "A verified fleet, flawless service, and a booking that takes seconds — the experience your trip deserves.",
+    "bookCta": "Book your vehicle",
+    "whatsappCta": "Contact us on WhatsApp",
+    "scroll": "Scroll",
+    "trust": {
+      "cancellation": "Free cancellation",
+      "airportDelivery": "Airport delivery",
+      "insurance": "Full insurance",
+      "noFees": "No hidden fees",
+      "support": "24/7 Support"
+    },
     "cars": "Cars",
     "motorcycles": "Motorcycles",
-    "searchCta": "Search vehicles",
-    "statVehicles": "Vehicles available",
-    "statSupport": "Support",
-    "statBooking": "Online booking",
-    "trustNote": "No commitment · Fast confirmation · Pay at the agency",
-    "cardTitle": "Ready to go",
-    "cardSubtitle": "Instant confirmation"
+    "whatsappPrefill": "Hi, I'm interested in renting a vehicle."
   },
   "vehicleCard": {
     "available": "Available",
@@ -239,7 +241,8 @@
     "reservations": "Reservations",
     "customers": "Customers",
     "analytics": "Analytics",
-    "settings": "Settings"
+    "settings": "Settings",
+    "website": "Website"
   },
   "dash": {
     "welcome": "Welcome back, {name}",
@@ -448,7 +451,6 @@
     "toastVehUpdated": "Vehicle updated",
     "toastVehAdded": "Vehicle added",
     "iuImages": "Images",
-    "iuNeedCloudinary": "Image uploads need Cloudinary configured. Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to .env (see the README), then restart the dev server. Existing images are still editable below.",
     "iuCover": "Cover",
     "iuSetCover": "Set as cover",
     "iuRemove": "Remove image",
@@ -459,7 +461,9 @@
     "iuMax": "You can attach up to {max} images.",
     "iuUnsupported": "{name}: unsupported file type.",
     "iuTooLarge": "{name}: larger than {mb} MB.",
-    "iuFailed": "Upload failed for {name}."
+    "iuFailed": "Upload failed for {name}.",
+    "iuLocalStorage": "Images are saved on the server (no Cloudinary account needed). For optimized cloud hosting, configure Cloudinary in .env instead.",
+    "vfInvalid": "Please fix the highlighted fields above."
   },
   "cust": {
     "title": "Customers",
@@ -616,17 +620,162 @@
     "grpBilling": "Billing",
     "grpSettings": "Settings",
     "perms": {
-      "fleetView": { "label": "View fleet", "desc": "See vehicles, categories, and pricing." },
-      "fleetManage": { "label": "Manage fleet", "desc": "Create, edit, and archive vehicles, pricing, and availability." },
-      "reservationsView": { "label": "View reservations", "desc": "See the booking calendar and reservation list." },
-      "reservationsManage": { "label": "Manage reservations", "desc": "Create, edit, and cancel reservations." },
-      "reservationsApprove": { "label": "Approve reservations", "desc": "Confirm pending requests and change status." },
-      "customersView": { "label": "View customers", "desc": "See the customer directory and profiles." },
-      "customersManage": { "label": "Manage customers", "desc": "Edit customer records, notes, and VIP/blacklist status." },
-      "analyticsView": { "label": "View analytics", "desc": "See revenue, occupancy, and performance dashboards." },
-      "teamManage": { "label": "Manage team", "desc": "Invite staff and assign roles." },
-      "billingManage": { "label": "Manage billing", "desc": "View invoices/payments and configure billing settings." },
-      "settingsManage": { "label": "Manage settings", "desc": "Edit agency profile, branding, and policies." }
-    }
+      "fleetView": {
+        "label": "View fleet",
+        "desc": "See vehicles, categories, and pricing."
+      },
+      "fleetManage": {
+        "label": "Manage fleet",
+        "desc": "Create, edit, and archive vehicles, pricing, and availability."
+      },
+      "reservationsView": {
+        "label": "View reservations",
+        "desc": "See the booking calendar and reservation list."
+      },
+      "reservationsManage": {
+        "label": "Manage reservations",
+        "desc": "Create, edit, and cancel reservations."
+      },
+      "reservationsApprove": {
+        "label": "Approve reservations",
+        "desc": "Confirm pending requests and change status."
+      },
+      "customersView": {
+        "label": "View customers",
+        "desc": "See the customer directory and profiles."
+      },
+      "customersManage": {
+        "label": "Manage customers",
+        "desc": "Edit customer records, notes, and VIP/blacklist status."
+      },
+      "analyticsView": {
+        "label": "View analytics",
+        "desc": "See revenue, occupancy, and performance dashboards."
+      },
+      "teamManage": {
+        "label": "Manage team",
+        "desc": "Invite staff and assign roles."
+      },
+      "billingManage": {
+        "label": "Manage billing",
+        "desc": "View invoices/payments and configure billing settings."
+      },
+      "settingsManage": {
+        "label": "Manage settings",
+        "desc": "Edit agency profile, branding, and policies."
+      }
+    },
+    "tmNewMember": "New teammate",
+    "tmNewMemberDesc": "Create a dashboard login for a staff member — they can sign in immediately with this password.",
+    "tmName": "Name",
+    "tmEmail": "Email",
+    "tmPassword": "Password",
+    "tmCreate": "Create account",
+    "tmCreated": "Team member created.",
+    "tmInvalid": "Please fix the highlighted fields."
+  },
+  "web": {
+    "title": "Website",
+    "subtitle": "Customize your agency's public site — pages, sections, theme.",
+    "noAccessTitle": "No access",
+    "noAccessDesc": "You don't have permission to view the website.",
+    "newPage": "New page",
+    "newPageDesc": "Create a new page for your public site.",
+    "pageTitle": "Page title",
+    "pageSlug": "URL (slug)",
+    "invalid": "Please fix the highlighted fields.",
+    "create": "Create",
+    "pagesTitle": "Pages",
+    "pagesDesc": "Click a page to edit it.",
+    "published": "Published",
+    "draft": "Draft",
+    "themeTitle": "Theme",
+    "themeDesc": "Brand colors used across the public site.",
+    "primaryColor": "Primary color",
+    "accentColor": "Accent color",
+    "saveTheme": "Save theme",
+    "themeSaved": "Theme saved.",
+    "publishRestricted": "Only the owner can publish website changes.",
+    "viewLiveSite": "View live site",
+    "pageCreated": "Page created.",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Save failed",
+    "preview": "Preview",
+    "viewLive": "View live",
+    "publish": "Publish",
+    "addSection": "Add section",
+    "selectSection": "Select a section to edit it.",
+    "emptyPage": "This page has no sections yet. Add one to get started.",
+    "reviewsPreviewNote": "Published reviews will appear here on the public site.",
+    "hidden": "Hidden",
+    "eyebrow": "Eyebrow",
+    "image": "Image",
+    "primaryButton": "Primary button",
+    "secondaryButton": "Secondary button",
+    "heading": "Heading",
+    "body": "Body",
+    "alignment": "Alignment",
+    "alignStart": "Left",
+    "alignCenter": "Center",
+    "altText": "Alt text",
+    "caption": "Caption",
+    "button": "Button",
+    "source": "Source",
+    "sourceFeatured": "Featured vehicles",
+    "sourceLatest": "Latest vehicles",
+    "sourceAll": "All vehicles",
+    "vehicleType": "Vehicle type",
+    "all": "All",
+    "cars": "Cars",
+    "motorcycles": "Motorcycles",
+    "categories": "Categories",
+    "sort": "Sort",
+    "sortNewest": "Newest",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "limit": "Max items",
+    "showViewAllButton": "Show \"View all\" button",
+    "items": "Questions",
+    "question": "Question",
+    "answer": "Answer",
+    "addQuestion": "Add question",
+    "height": "Height",
+    "buttonLabel": "Button text",
+    "buttonLink": "Destination",
+    "buttonStyle": "Style",
+    "styPrimary": "Primary",
+    "stySecondary": "Secondary",
+    "styOutline": "Outline",
+    "styGhost": "Ghost",
+    "linkKind_none": "None",
+    "linkKind_vehicles": "Vehicle list",
+    "linkKind_vehicle": "A vehicle",
+    "linkKind_category": "A category",
+    "linkKind_page": "A page",
+    "linkKind_contact": "Contact page",
+    "linkKind_whatsapp": "WhatsApp",
+    "linkKind_phone": "Phone",
+    "linkKind_email": "Email",
+    "linkKind_anchor": "Anchor on this page",
+    "linkKind_external": "External URL",
+    "linkSlugPlaceholder": "slug",
+    "blockType_hero": "Hero",
+    "blockType_richText": "Text",
+    "blockType_image": "Image",
+    "blockType_cta": "Call to action",
+    "blockType_vehicleGrid": "Vehicle grid",
+    "blockType_faq": "FAQ",
+    "blockType_reviews": "Reviews",
+    "blockType_spacer": "Spacer",
+    "fieldTitle": "Title",
+    "fieldSubtitle": "Subtitle",
+    "pageSlugHint": "Auto-generated from the title — lowercase letters, numbers, and hyphens only.",
+    "blockType_stats": "Statistics",
+    "statItems": "Stat items",
+    "statValue": "Value",
+    "statIcon": "Icon",
+    "statLabel": "Label",
+    "addStat": "Add stat"
   }
 }

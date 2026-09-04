@@ -140,7 +140,7 @@ export function ReserveDialog({
           <CalendarClock /> {t("cta")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="dark marketing-shell max-h-[85vh] overflow-y-auto border-white/10 sm:max-w-lg">
+      <DialogContent className="marketing-shell max-h-[85vh] overflow-y-auto border-border sm:max-w-lg">
         {confirmation ? (
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <span className="flex size-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">

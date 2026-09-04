@@ -24,6 +24,14 @@ export function formatCurrency(
   }).format(amount);
 }
 
+/** Locale-pinned number formatting (thousands separators, e.g. mileage) —
+ * `.toLocaleString()` without an explicit locale uses the runtime's default,
+ * which differs between server (Node) and browser and causes a hydration
+ * mismatch for anything rendered as (or inside) a Client Component. */
+export function formatNumber(value: number) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
 export function formatDate(date: Date | string, opts?: Intl.DateTimeFormatOptions) {
   const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat("en-US", {
@@ -32,6 +40,14 @@ export function formatDate(date: Date | string, opts?: Intl.DateTimeFormatOption
     day: "numeric",
     ...opts,
   }).format(d);
+}
+
+/** Build a `wa.me` deep link from an agency's configured WhatsApp number
+ * (any format — spaces/dashes/parens are stripped), or `null` if unset. */
+export function whatsappLink(number: string | null | undefined, message?: string) {
+  const digits = number?.replace(/[^\d]/g, "");
+  if (!digits) return null;
+  return message ? `https://wa.me/${digits}?text=${encodeURIComponent(message)}` : `https://wa.me/${digits}`;
 }
 
 export function slugify(input: string) {

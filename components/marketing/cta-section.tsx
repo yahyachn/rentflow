@@ -10,7 +10,7 @@ export function CtaSection() {
   return (
     <section className="mx-auto max-w-6xl px-4 pt-8 pb-24 lg:px-6">
       <Reveal>
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 px-6 py-16 text-center sm:px-14">
+        <div className="relative overflow-hidden rounded-3xl border border-border px-6 py-16 text-center sm:px-14">
           {/* animated gradient backdrop */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-primary/10 to-[var(--gold)]/20" />
           <div className="animate-float-slow absolute -top-20 end-10 size-64 rounded-full bg-[var(--gold)]/25 blur-3xl" />
