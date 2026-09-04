@@ -4,6 +4,7 @@ import { ROLE_PRESETS } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import type { AgencyProfileInput } from "@/validators/settings";
+import type { BrandColorsInput } from "@/validators/website";
 
 type Tx = PrismaClient | Prisma.TransactionClient;
 
@@ -100,5 +101,14 @@ export function updateAgencyProfile(agencyId: string, input: AgencyProfileInput)
       currency: input.currency,
       timezone: input.timezone,
     },
+  });
+}
+
+/** Website > Theme tab — the public site's brand colors (see lib/theme-agency.ts
+ * for where these get applied). */
+export function updateAgencyBrandColors(agencyId: string, input: BrandColorsInput) {
+  return prisma.agency.update({
+    where: { id: agencyId },
+    data: { primaryColor: input.primaryColor, accentColor: input.accentColor },
   });
 }

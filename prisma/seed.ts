@@ -11,7 +11,7 @@
 import { hashPassword } from "better-auth/crypto";
 
 import { prisma } from "../lib/prisma";
-import { PERMISSIONS } from "../lib/permissions";
+import { PERMISSIONS, ROLE_PRESETS } from "../lib/permissions";
 import { provisionAgency } from "../services/agency";
 import { slugify } from "../lib/utils";
 
@@ -27,6 +27,39 @@ async function seedPermissions() {
     });
   }
   console.log(`Seeded ${PERMISSIONS.length} permissions.`);
+}
+
+/**
+ * Backfill: when a new permission is added to lib/permissions.ts (e.g. the
+ * Website Builder's website.view/edit/publish), agencies created *before*
+ * that change already have their system roles (Owner/Manager/Employee) —
+ * provisionAgencyRoles only runs once, at agency creation — so this grants
+ * every existing system role whatever new permissions ROLE_PRESETS now says
+ * it should have, without touching roles it already has or any custom role.
+ * Idempotent: re-running only ever adds missing links, never removes one.
+ */
+async function backfillRolePermissions() {
+  const permissionByKey = new Map((await prisma.permission.findMany()).map((p) => [p.key, p.id]));
+  let added = 0;
+
+  for (const [roleName, presetKeys] of Object.entries(ROLE_PRESETS)) {
+    const roles = await prisma.role.findMany({
+      where: { name: roleName, isSystem: true },
+      include: { permissions: { select: { permissionId: true } } },
+    });
+    for (const role of roles) {
+      const has = new Set(role.permissions.map((rp) => rp.permissionId));
+      const missing = presetKeys
+        .map((key) => permissionByKey.get(key))
+        .filter((id): id is string => id != null && !has.has(id));
+      if (missing.length === 0) continue;
+      await prisma.rolePermission.createMany({
+        data: missing.map((permissionId) => ({ roleId: role.id, permissionId })),
+      });
+      added += missing.length;
+    }
+  }
+  console.log(`Backfilled ${added} role-permission link(s) on existing agencies.`);
 }
 
 const CAR_CATEGORIES = [
@@ -273,6 +306,7 @@ async function seedDemoAgency() {
 
 async function main() {
   await seedPermissions();
+  await backfillRolePermissions();
   await seedDemoAgency();
 }
 

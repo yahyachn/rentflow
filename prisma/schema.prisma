@@ -97,6 +97,8 @@ model Agency {
   activityLogs       ActivityLog[]
   auditLogs          AuditLog[]
   settings           Settings?
+  website            Website?
+  websitePages       WebsitePage[]
 
   @@index([status])
   @@map("agencies")
@@ -895,6 +897,106 @@ model ActivityLog {
 
   @@index([agencyId, createdAt])
   @@map("activity_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Website builder (per-agency customizable public site)
+// ---------------------------------------------------------------------------
+//
+// A page's content lives as validated JSON (see validators/website-blocks.ts
+// for the Zod discriminated union every read/write is checked against — never
+// trust these columns as `any`). Vehicles/customers/reservations stay fully
+// relational; JSON here is presentation/config only, never business data.
+//
+// Backward compatibility: an agency with no `Website` row (every agency that
+// existed before this feature) keeps rendering the original hardcoded
+// marketing components — see app/(marketing)/page.tsx's fallback. A `Website`
+// + Home `WebsitePage` is created lazily (services/website.ts#getOrCreateWebsite)
+// the first time an Owner/Manager opens the dashboard's Website section, in
+// DRAFT status, seeded to approximate the current default look. Nothing
+// changes on the public site until they hit Publish.
+
+enum WebsitePageStatus {
+  DRAFT
+  PUBLISHED
+}
+
+/// One per agency: theme + global sections (nav/footer) shared by every page.
+/// Agency.primaryColor/accentColor (already on Agency) remain the source of
+/// truth for brand color — not duplicated here, see lib/theme-agency.ts.
+model Website {
+  id       String @id @default(uuid())
+  agencyId String @unique
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  /// NavigationItem[] — validated by validators/website-blocks.ts#navigationSchema.
+  navigation Json?
+  /// FooterConfig — validated by validators/website-blocks.ts#footerConfigSchema.
+  footer     Json?
+
+  seoTitle       String?
+  seoDescription String? @db.Text
+  seoImageUrl    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pages WebsitePage[]
+
+  @@map("websites")
+}
+
+model WebsitePage {
+  id        String  @id @default(uuid())
+  agencyId  String
+  agency    Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  websiteId String
+  website   Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  /// "" reserved for the home page ("/"); otherwise a URL segment ("about", "services/airport-transfer").
+  slug   String
+  title  String
+  isHome Boolean @default(false)
+
+  status WebsitePageStatus @default(DRAFT)
+
+  /// Block[] currently being edited — validated by validators/website-blocks.ts#pageBlocksSchema.
+  draftBlocks     Json
+  /// Snapshot of draftBlocks at the last Publish. Null until first publish —
+  /// the public site 404s a page that's never been published.
+  publishedBlocks Json?
+
+  seoTitle       String?
+  seoDescription String? @db.Text
+  seoImageUrl    String?
+
+  publishedAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  versions WebsitePageVersion[]
+
+  @@unique([agencyId, slug])
+  @@index([agencyId, status])
+  @@map("website_pages")
+}
+
+/// Snapshot written on every Publish (not per-autosave) so a directeur can
+/// look back at previous published versions without an unbounded history.
+model WebsitePageVersion {
+  id     String      @id @default(uuid())
+  pageId String
+  page   WebsitePage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  blocks Json
+  label  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([pageId, createdAt])
+  @@map("website_page_versions")
 }
 
 /// Formal audit trail — before/after diffs for compliance-sensitive changes

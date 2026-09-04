@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Users,
   BarChart3,
+  Globe,
   Settings,
 } from "lucide-react";
 
@@ -27,5 +28,6 @@ export const DASHBOARD_NAV_ITEMS: NavItem[] = [
   },
   { labelKey: "customers", href: "/dashboard/customers", icon: Users, permission: "customers.view" },
   { labelKey: "analytics", href: "/dashboard/analytics", icon: BarChart3, permission: "analytics.view" },
+  { labelKey: "website", href: "/dashboard/website", icon: Globe, permission: "website.view" },
   { labelKey: "settings", href: "/dashboard/settings", icon: Settings, permission: "settings.manage" },
 ];

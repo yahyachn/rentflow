@@ -16,6 +16,7 @@ export const PERMISSION_GROUPS = [
   "Team",
   "Billing",
   "Settings",
+  "Website",
 ] as const;
 
 export type PermissionGroup = (typeof PERMISSION_GROUPS)[number];
@@ -39,13 +40,16 @@ export const PERMISSIONS: PermissionDef[] = [
   { key: "team.manage", label: "Manage team", group: "Team", description: "Invite staff and assign roles." },
   { key: "billing.manage", label: "Manage billing", group: "Billing", description: "View invoices/payments and configure billing settings." },
   { key: "settings.manage", label: "Manage settings", group: "Settings", description: "Edit agency profile, branding, and policies." },
+  { key: "website.view", label: "View website", group: "Website", description: "See the public site's pages, theme, and navigation." },
+  { key: "website.edit", label: "Edit website", group: "Website", description: "Edit page content, sections, theme, and navigation (drafts)." },
+  { key: "website.publish", label: "Publish website", group: "Website", description: "Publish draft changes so they go live on the public site." },
 ];
 
 export const ROLE_PRESETS: Record<"Owner" | "Manager" | "Employee", string[]> = {
   Owner: PERMISSIONS.map((p) => p.key),
-  Manager: PERMISSIONS.filter((p) => !["team.manage", "billing.manage"].includes(p.key)).map(
-    (p) => p.key,
-  ),
+  Manager: PERMISSIONS.filter(
+    (p) => !["team.manage", "billing.manage", "website.publish"].includes(p.key),
+  ).map((p) => p.key),
   Employee: [
     "fleet.view",
     "reservations.view",
